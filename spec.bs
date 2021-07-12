@@ -22,6 +22,71 @@ spec: ui-events; urlPrefix: https://w3c.github.io/uievents/#
   text: keydown; type: event; url: event-type-keydown
 </pre>
 
+<style>
+.selected-text-file-an-issue {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: smaller;
+  padding: 4px 10px;
+  z-index: 4;
+}
+
+dfn var {
+  font-style: italic;
+}
+
+table {
+  margin: 1em 0;
+}
+
+/* WHATWG-style <hr>s, instead of WICG-style. Specific selector is necessary to override WICG styles. */
+:not(.head) > :not(.head) + hr {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 3em 0;
+  height: auto;
+}
+:not(.head) > :not(.head) + hr::before {
+  content: none;
+}
+
+/* domintro from https://resources.whatwg.org/standard.css */
+.domintro {
+  position: relative;
+  color: green;
+  background: #DDFFDD;
+  margin: 2.5em 0 2em 0;
+  padding: 1.5em 1em 0.5em 2em;
+}
+
+.domintro dt, .domintro dt * {
+  color: black;
+  font-size: inherit;
+}
+.domintro dd {
+  margin: 0.5em 0 1em 2em; padding: 0;
+}
+.domintro dd p {
+  margin: 0.5em 0;
+}
+.domintro::before {
+  content: 'For web developers (non-normative)';
+  background: green;
+  color: white;
+  padding: 0.15em 0.25em;
+  font-style: normal;
+  position: absolute;
+  top: -0.8em;
+  left: -0.8em;
+}
+</style>
+
+<script src="https://resources.whatwg.org/file-issue.js" async></script>
+
 <h2 id="close-signals">Close signals</h2>
 
 (This section could be introduced as a new subsection of [[!HTML]]'s <a href="https://html.spec.whatwg.org/#editing">User interaction</a> section.)
@@ -37,11 +102,12 @@ In an [=implementation-defined=] (and likely device-specific) manner, a user can
   * The square button on a DualShock (PlayStation) controller
 </div>
 
-Whenever the user agent receives a potential close signal targeted at a {{Document}} |document|, it must perform the following steps:
+Whenever the user agent receives a potential close signal targeted at a {{Document}} |document|, it must perform the following <dfn export>close signal steps</dfn>:
 
 1. Fire any relevant event, per <cite>UI Events</cite> or other relevant specifications. [[!UI-EVENTS]]
 1. If such an event was fired, and its [=Event/canceled flag=] is set, then return.
 1. If such an event was fired, then perform the following steps within the same task as that event was fired in, immediately after firing the event. Otherwise, [=queue a global task=] on the [=user interaction task source=] given |document|'s [=relevant global object=] to perform the following steps.
+1. If |document| is not [=Document/fully active=], then return.
 1. Let |closedSomething| be the result of [=signaling close=] on |document|.
 1. If |closedSomething| was true, then return.
 1. Otherwise, there was nothing watching for a close signal. The user agent may instead interpret this interaction as some other action, instead of as a close signal.
@@ -52,23 +118,104 @@ Whenever the user agent receives a potential close signal targeted at a {{Docume
 
 <h3 id="close-watchers">Close watcher infrastructure</h3>
 
-Each {{Document}} has a <dfn export>close watcher stack</dfn>, a [=stack=] of [=close watchers=].
+Each {{Document}} has a <dfn export>close watcher stack</dfn>, a [=stack=] of [=close watchers=], initially empty.
 
 A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/items=]:
 
 * A <dfn export for="close watcher">close action</dfn>, a list of steps. These steps can never throw an exception.
 * An <dfn export for="close watcher">is still valid</dfn> list of steps. These steps can never throw an exception, and return either true or false.
+* A <dfn export for="close watcher">blocks further developer-controlled close watchers</dfn> boolean.
 
-<p class="note">The [=close watcher/is still valid=] steps are a spec convenience that allows us to [=stack/push=] [=close watchers=] onto the stack without having to add hooks to appropriately clean them up every time they become invalidated. Doing so can be tricky as in addition to explicit teardown steps, there are often implicit ones, e.g. by removing a relevant element from the document.
+<p class="note">The [=close watcher/is still valid=] steps are a spec convenience that allows us to [=stack/push=] [=close watchers=] onto the [=close watcher stack|stack=] without having to add hooks to appropriately clean them up every time they become invalidated. Doing so can be tricky as in addition to explicit teardown steps, there are often implicit ones, e.g. by removing a relevant element from the document.
 
-To <dfn>signal close</dfn> given a {{Document}} |document|:
+<div algorithm>
+  To <dfn>signal close</dfn> given a {{Document}} |document|:
 
-1. While |document|'s [=close watcher stack=] is not empty:
-  1. Let |closeWatcher| be the result of [=stack/popping=] from |document|'s [=close watcher stack=].
-  1. If |closeWatcher|'s [=close watcher/is still valid=] steps return true, then:
-    1. Perform |closeWatcher|'s [=close watcher/close action=].
-    1. Return true.
-1. Return false.
+  1. While |document|'s [=close watcher stack=] is not empty:
+    1. Let |closeWatcher| be the result of [=stack/popping=] from |document|'s [=close watcher stack=].
+    1. If |closeWatcher|'s [=close watcher/is still valid=] steps return true, then:
+      1. Perform |closeWatcher|'s [=close watcher/close action=].
+      1. Return true.
+  1. Return false.
+</div>
+
+<div algorithm>
+  We <dfn lt="can create a developer-controlled close watcher|cannot create a developer-controlled close watcher">can create a developer-controlled close watcher</dfn> for a {{Document}} |document| if the following steps return true:
+
+  1. If |document| is not [=Document/fully active=], then return false.
+  1. If |document|'s [=relevant global object=] has [=transient activation=], then return true.
+  1. [=list/For each=] |closeWatcher| in |document|'s [=close watcher stack=]:
+    1. If |closeWatcher|'s [=close watcher/is still valid=] steps return true, and |closeWatcher|'s [=close watcher/blocks further developer-controlled close watchers=] is true, then return false.
+  1. Return true.
+</div>
+
+<h3 id="close-watcher-api">Close watcher API</h3>
+
+<xmp class="idl">
+[Exposed=Window]
+interface CloseWatcher : EventTarget {
+  constructor();
+
+  undefined destroy();
+  undefined signalClose();
+
+  attribute EventHandler onclose;
+};
+</xmp>
+
+<dl class="domintro non-normative">
+  <dt><code><var ignore>watcher</var> = new {{CloseWatcher/constructor()|CloseWatcher}}()</code></dt>
+  <dd>
+    <p>Attempts to create a new {{CloseWatcher}} instance.
+
+    <p>If a {{CloseWatcher}} is already active, then this will instead throw a "{{NotAllowedError}}" {{DOMException}}.
+  </dd>
+
+  <dt><code><var ignore>watcher</var>.{{CloseWatcher/destroy()|destroy}}()</code></dt>
+  <dd>
+    <p>Deactivates this {{CloseWatcher}} instance, so that it will no longer receive {{CloseWatcher/close}} events and so that new {{CloseWatcher}} instances can be constructed.
+
+    <p>This is intended to be called if the relevant UI element is closed in some other way than via a [=close signal=], e.g. by pressing an explicit "Close" button.
+  </dd>
+
+  <dt><code><var ignore>watcher</var>.{{CloseWatcher/signalClose()|signalClose}}()</code></dt>
+  <dd>
+    <p>Acts as if a [=close signal=] was sent targeting this {{CloseWatcher}} instance, by firing a {{CloseWatcher/close}} event and deactivating the close watcher as if {{CloseWatcher/destroy()}} was called.
+
+    <p>This is a helper utility that can be used to consolidate closing logic into the {{CloseWatcher/close}} event handler, by having all non-[=close signal=] closing affordances call {{CloseWatcher/signalClose()}}.
+  </dd>
+</dl>
+
+Each {{CloseWatcher}} has an <dfn for="CloseWatcher">is active</dfn>, which is a boolean.
+
+<div algorithm>
+  The <dfn constructor for="CloseWatcher" lt="CloseWatcher()">new CloseWatcher()</dfn> constructor steps are:
+
+  1. If we [=cannot create a developer-controlled close watcher=] for [=this=]'s [=relevant global object=]'s [=associated document=], then throw a "{{NotAllowedError}}" {{DOMException}}.
+  1. Set [=this=]'s [=CloseWatcher/is active=] to true.
+  1. [=stack/Push=] a new [=close watcher=] on [=this=]'s [=relevant global object=]'s [=associated document=]'s [=close watcher stack=], with its [=struct/items=] set as follows:
+    * [=close watcher/close action=] being to [=CloseWatcher/signal close=] on [=this=]
+    * [=close watcher/is still valid=] steps being to return [=this=]'s [=CloseWatcher/is active=]
+    * [=close watcher/blocks further developer-controlled close watchers=] being true
+</div>
+
+<div algorithm>
+  The <dfn method for="CloseWatcher">destroy()</dfn> method steps are to set [=this=]'s [=CloseWatcher/is active=] to false.
+</div>
+
+<div algorithm>
+  The <dfn method for="CloseWatcher">signalClose()</dfn> method steps are to [=CloseWatcher/signal close=] on [=this=].
+</div>
+
+Objects implementing the {{CloseWatcher}} interface must support the <dfn attribute for="CloseWatcher">onclose</dfn> [=event handler IDL attribute=], whose [=event handler event type=] is <dfn event for="CloseWatcher">close</dfn>.
+
+<div algorithm>
+  To <dfn for="CloseWatcher">signal close</dfn> on a {{CloseWatcher}} |closeWatcher|:
+
+  1. If |closeWatcher|'s [=CloseWatcher/is active=] is false, then return.
+  1. [=Fire an event=] named {{CloseWatcher/close}} at |closeWatcher|.
+  1. Set |closeWatcher|'s [=CloseWatcher/is active=] to false.
+</div>
 
 <h2 id="patches">Updates to other specifications</h2>
 
@@ -79,7 +226,10 @@ Update <cite>Fullscreen</cite> as follows: [[!FULLSCREEN]]
 <div algorithm="run the fullscreen steps patch">
   Update the <a spec="FULLSCREEN">run the fullscreen steps</a> by appending the following step:
 
-  1. If <var ignore>pairs</var> is non-empty, then [=stack/push=] a new [=close watcher=] on |document|'s [=close watcher stack=], with its [=close watcher/close action=] being to <a spec="FULLSCREEN">fully exit fullscreen</a> given |document|, and with its [=close watcher/is still valid=] steps being to return true if |document|'s [=fullscreen element=] is non-null, and return false otherwise.
+  1. If <var ignore>pairs</var> is non-empty, then [=stack/push=] a new [=close watcher=] on |document|'s [=close watcher stack=], with its [=struct/items=] set as follows:
+    * [=close watcher/close action=] being to <a spec="FULLSCREEN">fully exit fullscreen</a> given |document|
+    * [=close watcher/is still valid=] steps being to return true if |document|'s [=fullscreen element=] is non-null,and false otherwise
+    * [=close watcher/blocks further developer-controlled close watchers=] being false
 </div>
 
 Replace the sentence about "If the end user instructs..." in [[FULLSCREEN#ui]] with the following:
@@ -93,7 +243,10 @@ Update <cite>HTML</cite>'s <a href="https://html.spec.whatwg.org/multipage/inter
 <div algorithm="showModal patch">
   In the {{HTMLDialogElement/showModal()}} steps, after adding |subject| to the [=top layer=], append the following step:
 
-  1. [=stack/Push=] a new [=close watcher=] on |subject|'s [=Node/node document=]'s [=close watcher stack=], with its [=close watcher/close action=] being to [=cancel the dialog=] |subject|, and with its [=close watcher/is still valid=] steps being to return true if |subject|'s [=Node/node document=] is <a spec="HTML" lt="blocked by a modal dialog">blocked by the modal dialog</a> |subject|, and return false otherwise.
+  1. If we [=can create a developer-controlled close watcher=] given |subject|'s [=Node/node document=], then [=stack/push=] a new [=close watcher=] on |subject|'s [=Node/node document=]'s [=close watcher stack=], with its [=struct/items=] set as follows:
+    * [=close watcher/close action=] being to [=cancel the dialog=] |subject|
+    * [=close watcher/is still valid=] steps being to return true if |subject|'s [=Node/node document=] is <a spec="HTML" lt="blocked by a modal dialog">blocked by the modal dialog</a> |subject|, and return false otherwise
+    * [=close watcher/blocks further developer-controlled close watchers=] being true
 </div>
 
 Replace the "Canceling dialogs" section entirely with the following definition. (The previous prose about providing a user interface to cancel such dialogs, and the task-queuing, is now handled by the infrastructure in [[#close-signals]].)
