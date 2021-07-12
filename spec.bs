@@ -17,3 +17,91 @@ Default Biblio Status: current
 Markup Shorthands: markdown yes
 Assume Explicit For: yes
 </pre>
+<pre class="anchors">
+spec: ui-events; urlPrefix: https://w3c.github.io/uievents/#
+  text: keydown; type: event; url: event-type-keydown
+</pre>
+
+<h2 id="close-signals">Close signals</h2>
+
+(This section could be introduced as a new subsection of [[!HTML]]'s <a href="https://html.spec.whatwg.org/#editing">User interaction</a> section.)
+
+In an [=implementation-defined=] (and likely device-specific) manner, a user can send a <dfn export>close signal</dfn> to the user agent. This indicates that the user wishes to close something which is currently being shown on the screen, such as a popup, menu, dialog, picker, or display mode.
+
+<div class="example" id="example-close-signals">
+  Some example close signals are:
+
+  * The <kbd>Esc</kbd> key on desktop platforms
+  * The back button on Android
+  * The two-finger scrub "z" gesture on iOS when using VoiceOver
+  * The square button on a DualShock (PlayStation) controller
+</div>
+
+Whenever the user agent receives a potential close signal targeted at a {{Document}} |document|, it must perform the following steps:
+
+1. Fire any relevant event, per <cite>UI Events</cite> or other relevant specifications. [[!UI-EVENTS]]
+1. If such an event was fired, and its [=Event/canceled flag=] is set, then return.
+1. If such an event was fired, then perform the following steps within the same task as that event was fired in, immediately after firing the event. Otherwise, [=queue a global task=] on the [=user interaction task source=] given |document|'s [=relevant global object=] to perform the following steps.
+1. Let |closedSomething| be the result of [=signaling close=] on |document|.
+1. If |closedSomething| was true, then return.
+1. Otherwise, there was nothing watching for a close signal. The user agent may instead interpret this interaction as some other action, instead of as a close signal.
+
+<p class="example" id="example-desktop-esc-sequence">On a desktop platform where <kbd>Esc</kbd> is the close signal, the user agent will first fire an appropriately-initialized {{keydown}} event. If the web developer intercepts this event and calls {{Event/preventDefault()}}, then nothing further happens. But if the event is fired without being canceled, then the user agent proceeds to [=signal close=].
+
+<p class="example" id="example-android-back-sequence">On Android where the back button is a potential close signal, no event is involved, so when the user agent determines that the back button represents a close signal, it [=queues a task=] to [=signal close=]. If there is a [=close watcher/is still valid|still-valid=] [=close watcher=], then that will get triggered; otherwise, the user agent will interpret the back button press as a request to <a spec="HTML">traverse the history by a delta</a> of &minus;1.
+
+<h3 id="close-watchers">Close watcher infrastructure</h3>
+
+Each {{Document}} has a <dfn export>close watcher stack</dfn>, a [=stack=] of [=close watchers=].
+
+A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/items=]:
+
+* A <dfn export for="close watcher">close action</dfn>, a list of steps. These steps can never throw an exception.
+* An <dfn export for="close watcher">is still valid</dfn> list of steps. These steps can never throw an exception, and return either true or false.
+
+<p class="note">The [=close watcher/is still valid=] steps are a spec convenience that allows us to [=stack/push=] [=close watchers=] onto the stack without having to add hooks to appropriately clean them up every time they become invalidated. Doing so can be tricky as in addition to explicit teardown steps, there are often implicit ones, e.g. by removing a relevant element from the document.
+
+To <dfn>signal close</dfn> given a {{Document}} |document|:
+
+1. While |document|'s [=close watcher stack=] is not empty:
+  1. Let |closeWatcher| be the result of [=stack/popping=] from |document|'s [=close watcher stack=].
+  1. If |closeWatcher|'s [=close watcher/is still valid=] steps return true, then:
+    1. Perform |closeWatcher|'s [=close watcher/close action=].
+    1. Return true.
+1. Return false.
+
+<h2 id="patches">Updates to other specifications</h2>
+
+<h3 id="patch-fullscreen">Fullscreen</h3>
+
+Update <cite>Fullscreen</cite> as follows: [[!FULLSCREEN]]
+
+<div algorithm="run the fullscreen steps patch">
+  Update the <a spec="FULLSCREEN">run the fullscreen steps</a> by appending the following step:
+
+  1. If <var ignore>pairs</var> is non-empty, then [=stack/push=] a new [=close watcher=] on |document|'s [=close watcher stack=], with its [=close watcher/close action=] being to <a spec="FULLSCREEN">fully exit fullscreen</a> given |document|, and with its [=close watcher/is still valid=] steps being to return true if |document|'s [=fullscreen element=] is non-null, and return false otherwise.
+</div>
+
+Replace the sentence about "If the end user instructs..." in [[FULLSCREEN#ui]] with the following:
+
+If the user initiates a [=close signal=], this will trigger the <a spec="FULLSCREEN">fully exit fullscreen</a> algorithm due to the [=close watcher=] set up while <a spec="FULLSCREEN">running the fullscreen steps</a>.
+
+<h3 id="patch-dialog">The <{dialog}> element</h3>
+
+Update <cite>HTML</cite>'s <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element">The `dialog` element</a> section as follows: [[!HTML]]
+
+<div algorithm="showModal patch">
+  In the {{HTMLDialogElement/showModal()}} steps, after adding |subject| to the [=top layer=], append the following step:
+
+  1. [=stack/Push=] a new [=close watcher=] on |subject|'s [=Node/node document=]'s [=close watcher stack=], with its [=close watcher/close action=] being to [=cancel the dialog=] |subject|, and with its [=close watcher/is still valid=] steps being to return true if |subject|'s [=Node/node document=] is <a spec="HTML" lt="blocked by a modal dialog">blocked by the modal dialog</a> |subject|, and return false otherwise.
+</div>
+
+Replace the "Canceling dialogs" section entirely with the following definition. (The previous prose about providing a user interface to cancel such dialogs, and the task-queuing, is now handled by the infrastructure in [[#close-signals]].)
+
+<div algorithm>
+  To <dfn>cancel the dialog</dfn> |dialog|:
+
+  1. Let |close| be the result of [=firing an event=] named {{HTMLElement/cancel}} at |dialog|, with the {{Event/cancelable}} attribute initialized to true.
+
+  1. If |close| is true and |dialog| has an <{dialog/open}> content attribute, then <a spec="HTML" lt="close">close the dialog</a> |dialog| with no return value.
+</div>
