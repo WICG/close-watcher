@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 3d6a6fcbb, updated Wed Jun 16 16:19:39 2021 -0700" name="generator">
+  <meta content="Bikeshed version bb6b91100, updated Mon Jul 12 16:52:37 2021 -0700" name="generator">
   <link href="https://domenic.github.io/close-watcher/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -2122,7 +2122,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Close Watcher API</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-12">12 July 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-13">13 July 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt class="editor">Editor:
@@ -2136,7 +2136,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 12 July 2021,
+In addition, as of 13 July 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2194,8 +2194,11 @@ Parts of this work may be from another specification document.  If so, those par
       <p>The square button on a DualShock (PlayStation) controller</p>
     </ul>
    </div>
-   <p>Whenever the user agent receives a potential close signal targeted at a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document">Document</a></code> <var>document</var>, it must perform the following <dfn data-dfn-type="dfn" data-export id="close-signal-steps">close signal steps<a class="self-link" href="#close-signal-steps"></a></dfn>:</p>
+   <p>Whenever the user agent receives a potential close signal targeted at a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document">Document</a></code> <var>document</var>, it must perform the following <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="close-signal-steps">close signal steps</dfn>:</p>
    <ol>
+    <li data-md>
+     <p>If <var>document</var>’s <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fullscreen-element" id="ref-for-fullscreen-element">fullscreen element</a> is non-null, then <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen" id="ref-for-fully-exit-fullscreen">fully exit fullscreen</a> and return.</p>
+     <p class="note" role="note">This does <em>not</em> fire any relevant event, such as <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/uievents/#event-type-keydown" id="ref-for-event-type-keydown">keydown</a></code>; it only fires fullscreenchange. </p>
     <li data-md>
      <p>Fire any relevant event, per <cite>UI Events</cite> or other relevant specifications. <a data-link-type="biblio" href="#biblio-ui-events">[UI-EVENTS]</a></p>
     <li data-md>
@@ -2211,7 +2214,7 @@ Parts of this work may be from another specification document.  If so, those par
     <li data-md>
      <p>Otherwise, there was nothing watching for a close signal. The user agent may instead interpret this interaction as some other action, instead of as a close signal.</p>
    </ol>
-   <p class="example" id="example-desktop-esc-sequence"><a class="self-link" href="#example-desktop-esc-sequence"></a>On a desktop platform where <kbd>Esc</kbd> is the close signal, the user agent will first fire an appropriately-initialized <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/uievents/#event-type-keydown" id="ref-for-event-type-keydown">keydown</a></code> event. If the web developer intercepts this event and calls <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-preventdefault" id="ref-for-dom-event-preventdefault">preventDefault()</a></code>, then nothing further happens. But if the event is fired without being canceled, then the user agent proceeds to <a data-link-type="dfn" href="#signal-close" id="ref-for-signal-close①">signal close</a>. </p>
+   <p class="example" id="example-desktop-esc-sequence"><a class="self-link" href="#example-desktop-esc-sequence"></a>On a desktop platform where <kbd>Esc</kbd> is the close signal, the user agent will first fire an appropriately-initialized <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/uievents/#event-type-keydown" id="ref-for-event-type-keydown①">keydown</a></code> event. If the web developer intercepts this event and calls <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-preventdefault" id="ref-for-dom-event-preventdefault">preventDefault()</a></code>, then nothing further happens. But if the event is fired without being canceled, then the user agent proceeds to <a data-link-type="dfn" href="#signal-close" id="ref-for-signal-close①">signal close</a>. </p>
    <p class="example" id="example-android-back-sequence"><a class="self-link" href="#example-android-back-sequence"></a>On Android where the back button is a potential close signal, no event is involved, so when the user agent determines that the back button represents a close signal, it <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">queues a task</a> to <a data-link-type="dfn" href="#signal-close" id="ref-for-signal-close②">signal close</a>. If there is a <a data-link-type="dfn" href="#close-watcher-is-still-valid" id="ref-for-close-watcher-is-still-valid">still-valid</a> <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher">close watcher</a>, then that will get triggered; otherwise, the user agent will interpret the back button press as a request to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/history.html#traverse-the-history-by-a-delta" id="ref-for-traverse-the-history-by-a-delta">traverse the history by a delta</a> of −1. </p>
    <h3 class="heading settled" data-level="1.1" id="close-watchers"><span class="secno">1.1. </span><span class="content">Close watcher infrastructure</span><a class="self-link" href="#close-watchers"></a></h3>
    <p>Each <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code> has a <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="close-watcher-stack">close watcher stack</dfn>, a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#stack" id="ref-for-stack">stack</a> of <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher①">close watchers</a>, initially empty.</p>
@@ -2324,38 +2327,22 @@ Parts of this work may be from another specification document.  If so, those par
    </div>
    <h2 class="heading settled" data-level="2" id="patches"><span class="secno">2. </span><span class="content">Updates to other specifications</span><a class="self-link" href="#patches"></a></h2>
    <h3 class="heading settled" data-level="2.1" id="patch-fullscreen"><span class="secno">2.1. </span><span class="content">Fullscreen</span><a class="self-link" href="#patch-fullscreen"></a></h3>
-   <p>Update <cite>Fullscreen</cite> as follows: <a data-link-type="biblio" href="#biblio-fullscreen">[FULLSCREEN]</a></p>
-   <div class="algorithm" data-algorithm="run the fullscreen steps patch">
-     Update the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#run-the-fullscreen-steps" id="ref-for-run-the-fullscreen-steps">run the fullscreen steps</a> by appending the following step: 
-    <ol>
-     <li data-md>
-      <p>If <var>pairs</var> is non-empty, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#stack-push" id="ref-for-stack-push②">push</a> a new <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher④">close watcher</a> on <var>document</var>’s <a data-link-type="dfn" href="#close-watcher-stack" id="ref-for-close-watcher-stack⑤">close watcher stack</a>, with its <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item②">items</a> set as follows:</p>
-      <ul>
-       <li data-md>
-        <p><a data-link-type="dfn" href="#close-watcher-close-action" id="ref-for-close-watcher-close-action②">close action</a> being to <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen" id="ref-for-fully-exit-fullscreen">fully exit fullscreen</a> given <var>document</var></p>
-       <li data-md>
-        <p><a data-link-type="dfn" href="#close-watcher-is-still-valid" id="ref-for-close-watcher-is-still-valid⑤">is still valid</a> steps being to return true if <var>document</var>’s <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fullscreen-element" id="ref-for-fullscreen-element">fullscreen element</a> is non-null,and false otherwise</p>
-       <li data-md>
-        <p><a data-link-type="dfn" href="#close-watcher-blocks-further-developer-controlled-close-watchers" id="ref-for-close-watcher-blocks-further-developer-controlled-close-watchers②">blocks further developer-controlled close watchers</a> being false</p>
-      </ul>
-    </ol>
-   </div>
    <p>Replace the sentence about "If the end user instructs..." in <a href="https://fullscreen.spec.whatwg.org/#ui">Fullscreen API §4 UI</a> with the following:</p>
-   <p>If the user initiates a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal③">close signal</a>, this will trigger the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen" id="ref-for-fully-exit-fullscreen①">fully exit fullscreen</a> algorithm due to the <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher⑤">close watcher</a> set up while <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#run-the-fullscreen-steps" id="ref-for-run-the-fullscreen-steps①">running the fullscreen steps</a>.</p>
+   <p>If the user initiates a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal③">close signal</a>, this will trigger the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen" id="ref-for-fully-exit-fullscreen①">fully exit fullscreen</a> algorithm as part of the <a data-link-type="dfn" href="#close-signal-steps" id="ref-for-close-signal-steps">close signal steps</a>. This takes precedence over any <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher④">close watchers</a>.</p>
    <h3 class="heading settled" data-level="2.2" id="patch-dialog"><span class="secno">2.2. </span><span class="content">The <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="ref-for-the-dialog-element">dialog</a></code> element</span><a class="self-link" href="#patch-dialog"></a></h3>
    <p>Update <cite>HTML</cite>’s <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="termref-for-the-dialog-element">The <code>dialog</code> element</a> section as follows: <a data-link-type="biblio" href="#biblio-html">[HTML]</a></p>
    <div class="algorithm" data-algorithm="showModal patch">
      In the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal" id="ref-for-dom-dialog-showmodal">showModal()</a></code> steps, after adding <var>subject</var> to the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#top-layer" id="ref-for-top-layer">top layer</a>, append the following step: 
     <ol>
      <li data-md>
-      <p>If we <a data-link-type="dfn" href="#can-create-a-developer-controlled-close-watcher" id="ref-for-can-create-a-developer-controlled-close-watcher①">can create a developer-controlled close watcher</a> given <var>subject</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#stack-push" id="ref-for-stack-push③">push</a> a new <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher⑥">close watcher</a> on <var>subject</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document①">node document</a>'s <a data-link-type="dfn" href="#close-watcher-stack" id="ref-for-close-watcher-stack⑥">close watcher stack</a>, with its <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item③">items</a> set as follows:</p>
+      <p>If we <a data-link-type="dfn" href="#can-create-a-developer-controlled-close-watcher" id="ref-for-can-create-a-developer-controlled-close-watcher①">can create a developer-controlled close watcher</a> given <var>subject</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#stack-push" id="ref-for-stack-push②">push</a> a new <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher⑤">close watcher</a> on <var>subject</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document①">node document</a>'s <a data-link-type="dfn" href="#close-watcher-stack" id="ref-for-close-watcher-stack⑤">close watcher stack</a>, with its <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item②">items</a> set as follows:</p>
       <ul>
        <li data-md>
-        <p><a data-link-type="dfn" href="#close-watcher-close-action" id="ref-for-close-watcher-close-action③">close action</a> being to <a data-link-type="dfn" href="#cancel-the-dialog" id="ref-for-cancel-the-dialog">cancel the dialog</a> <var>subject</var></p>
+        <p><a data-link-type="dfn" href="#close-watcher-close-action" id="ref-for-close-watcher-close-action②">close action</a> being to <a data-link-type="dfn" href="#cancel-the-dialog" id="ref-for-cancel-the-dialog">cancel the dialog</a> <var>subject</var></p>
        <li data-md>
-        <p><a data-link-type="dfn" href="#close-watcher-is-still-valid" id="ref-for-close-watcher-is-still-valid⑥">is still valid</a> steps being to return true if <var>subject</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document②">node document</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#blocked-by-a-modal-dialog" id="ref-for-blocked-by-a-modal-dialog">blocked by the modal dialog</a> <var>subject</var>, and return false otherwise</p>
+        <p><a data-link-type="dfn" href="#close-watcher-is-still-valid" id="ref-for-close-watcher-is-still-valid⑤">is still valid</a> steps being to return true if <var>subject</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document②">node document</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#blocked-by-a-modal-dialog" id="ref-for-blocked-by-a-modal-dialog">blocked by the modal dialog</a> <var>subject</var>, and return false otherwise</p>
        <li data-md>
-        <p><a data-link-type="dfn" href="#close-watcher-blocks-further-developer-controlled-close-watchers" id="ref-for-close-watcher-blocks-further-developer-controlled-close-watchers③">blocks further developer-controlled close watchers</a> being true</p>
+        <p><a data-link-type="dfn" href="#close-watcher-blocks-further-developer-controlled-close-watchers" id="ref-for-close-watcher-blocks-further-developer-controlled-close-watchers②">blocks further developer-controlled close watchers</a> being true</p>
       </ul>
     </ol>
    </div>
@@ -2574,19 +2561,14 @@ Parts of this work may be from another specification document.  If so, those par
   <aside class="dfn-panel" data-for="term-for-fullscreen-element">
    <a href="https://fullscreen.spec.whatwg.org/#fullscreen-element">https://fullscreen.spec.whatwg.org/#fullscreen-element</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-fullscreen-element">2.1. Fullscreen</a>
+    <li><a href="#ref-for-fullscreen-element">1. Close signals</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-fully-exit-fullscreen">
    <a href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen">https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-fully-exit-fullscreen">2.1. Fullscreen</a> <a href="#ref-for-fully-exit-fullscreen①">(2)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="term-for-run-the-fullscreen-steps">
-   <a href="https://fullscreen.spec.whatwg.org/#run-the-fullscreen-steps">https://fullscreen.spec.whatwg.org/#run-the-fullscreen-steps</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-run-the-fullscreen-steps">2.1. Fullscreen</a> <a href="#ref-for-run-the-fullscreen-steps①">(2)</a>
+    <li><a href="#ref-for-fully-exit-fullscreen">1. Close signals</a>
+    <li><a href="#ref-for-fully-exit-fullscreen①">2.1. Fullscreen</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-top-layer">
@@ -2717,8 +2699,7 @@ Parts of this work may be from another specification document.  If so, those par
    <ul>
     <li><a href="#ref-for-struct-item">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-struct-item①">1.2. Close watcher API</a>
-    <li><a href="#ref-for-struct-item②">2.1. Fullscreen</a>
-    <li><a href="#ref-for-struct-item③">2.2. The dialog element</a>
+    <li><a href="#ref-for-struct-item②">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-stack-pop">
@@ -2732,8 +2713,7 @@ Parts of this work may be from another specification document.  If so, those par
    <ul>
     <li><a href="#ref-for-stack-push">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-stack-push①">1.2. Close watcher API</a>
-    <li><a href="#ref-for-stack-push②">2.1. Fullscreen</a>
-    <li><a href="#ref-for-stack-push③">2.2. The dialog element</a>
+    <li><a href="#ref-for-stack-push②">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-stack">
@@ -2751,7 +2731,7 @@ Parts of this work may be from another specification document.  If so, those par
   <aside class="dfn-panel" data-for="term-for-event-type-keydown">
    <a href="https://w3c.github.io/uievents/#event-type-keydown">https://w3c.github.io/uievents/#event-type-keydown</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-event-type-keydown">1. Close signals</a>
+    <li><a href="#ref-for-event-type-keydown">1. Close signals</a> <a href="#ref-for-event-type-keydown①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-idl-DOMException">
@@ -2802,7 +2782,6 @@ Parts of this work may be from another specification document.  If so, those par
     <ul>
      <li><span class="dfn-paneled" id="term-for-fullscreen-element">fullscreen element</span>
      <li><span class="dfn-paneled" id="term-for-fully-exit-fullscreen">fully exit fullscreen</span>
-     <li><span class="dfn-paneled" id="term-for-run-the-fullscreen-steps">run the fullscreen steps</span>
      <li><span class="dfn-paneled" id="term-for-top-layer">top layer</span>
     </ul>
    <li>
@@ -2887,13 +2866,18 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#ref-for-close-signal③">2.1. Fullscreen</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="close-signal-steps">
+   <b><a href="#close-signal-steps">#close-signal-steps</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-close-signal-steps">2.1. Fullscreen</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="close-watcher-stack">
    <b><a href="#close-watcher-stack">#close-watcher-stack</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-close-watcher-stack">1.1. Close watcher infrastructure</a> <a href="#ref-for-close-watcher-stack①">(2)</a> <a href="#ref-for-close-watcher-stack②">(3)</a> <a href="#ref-for-close-watcher-stack③">(4)</a>
     <li><a href="#ref-for-close-watcher-stack④">1.2. Close watcher API</a>
-    <li><a href="#ref-for-close-watcher-stack⑤">2.1. Fullscreen</a>
-    <li><a href="#ref-for-close-watcher-stack⑥">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher-stack⑤">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher">
@@ -2902,8 +2886,8 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#ref-for-close-watcher">1. Close signals</a>
     <li><a href="#ref-for-close-watcher①">1.1. Close watcher infrastructure</a> <a href="#ref-for-close-watcher②">(2)</a>
     <li><a href="#ref-for-close-watcher③">1.2. Close watcher API</a>
-    <li><a href="#ref-for-close-watcher④">2.1. Fullscreen</a> <a href="#ref-for-close-watcher⑤">(2)</a>
-    <li><a href="#ref-for-close-watcher⑥">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher④">2.1. Fullscreen</a>
+    <li><a href="#ref-for-close-watcher⑤">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher-close-action">
@@ -2911,8 +2895,7 @@ Parts of this work may be from another specification document.  If so, those par
    <ul>
     <li><a href="#ref-for-close-watcher-close-action">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-close-watcher-close-action①">1.2. Close watcher API</a>
-    <li><a href="#ref-for-close-watcher-close-action②">2.1. Fullscreen</a>
-    <li><a href="#ref-for-close-watcher-close-action③">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher-close-action②">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher-is-still-valid">
@@ -2921,8 +2904,7 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#ref-for-close-watcher-is-still-valid">1. Close signals</a>
     <li><a href="#ref-for-close-watcher-is-still-valid①">1.1. Close watcher infrastructure</a> <a href="#ref-for-close-watcher-is-still-valid②">(2)</a> <a href="#ref-for-close-watcher-is-still-valid③">(3)</a>
     <li><a href="#ref-for-close-watcher-is-still-valid④">1.2. Close watcher API</a>
-    <li><a href="#ref-for-close-watcher-is-still-valid⑤">2.1. Fullscreen</a>
-    <li><a href="#ref-for-close-watcher-is-still-valid⑥">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher-is-still-valid⑤">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher-blocks-further-developer-controlled-close-watchers">
@@ -2930,8 +2912,7 @@ Parts of this work may be from another specification document.  If so, those par
    <ul>
     <li><a href="#ref-for-close-watcher-blocks-further-developer-controlled-close-watchers">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-close-watcher-blocks-further-developer-controlled-close-watchers①">1.2. Close watcher API</a>
-    <li><a href="#ref-for-close-watcher-blocks-further-developer-controlled-close-watchers②">2.1. Fullscreen</a>
-    <li><a href="#ref-for-close-watcher-blocks-further-developer-controlled-close-watchers③">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher-blocks-further-developer-controlled-close-watchers②">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="signal-close">
