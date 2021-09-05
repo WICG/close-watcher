@@ -205,7 +205,7 @@ Our proposal is to replace the vague specification sentence above with [text bas
 
 - It makes it clear how `<dialog>`s interact with `CloseWatcher` instances: they both live in the same per-`Document` close watcher stack.
 
-- It drives interoperability in terms of user- and developer-facing `<dialog>` behavior by providing a more concrete specification, e.g. with regards to how the `<dialog>`'s `cancel` event is sequenced versus the `keydown` event for <kbd>Esc</kbd> keyp presses.
+- It drives interoperability in terms of user- and developer-facing `<dialog>` behavior by providing a more concrete specification, e.g. with regards to how the `<dialog>`'s `cancel` event is sequenced versus the `keydown` event for <kbd>Esc</kbd> keypresses.
 
 ### Integration with Fullscreen
 
@@ -233,13 +233,13 @@ Note that the line between "UI state" and "a navigation" can be blurry in single
 
 ### Automatically translating all close signals to <kbd>Esc</kbd>
 
-If we assume that developers already know to handle the <kbd>Esc</kbd> key to close their components, then we could potentially translate other close signals, like the Android back button, into <kbd>Esc</kbd> key presses. The hope is then that application and component developers wouldn't have to update their code at all: if they're doing the right think for that common desktop close signal, they would suddenly start doing the right thing on other platforms as well. This is especially attractive as it could help avoid the awkward transition period mentioned in the [goals](#goals) section.
+If we assume that developers already know to handle the <kbd>Esc</kbd> key to close their components, then we could potentially translate other close signals, like the Android back button, into <kbd>Esc</kbd> key presses. The hope is then that application and component developers wouldn't have to update their code at all: if they're doing the right thing for that common desktop close signal, they would suddenly start doing the right thing on other platforms as well. This is especially attractive as it could help avoid the awkward transition period mentioned in the [goals](#goals) section.
 
 However, upon reflection, such a solution doesn't really solve the general problem. Given an Android back button press, or a PlayStation square button press, or any other gesture which might serve multiple context-dependent purposes, the browser needs to know: should perform its usual action, or should it be translated to an <kbd>Esc</kbd> key press? For custom components, the only way to know is for the web developer to tell the browser that a close-signal-consuming component is open. So our goal of requiring no code modifications, or awkward transition period, is impossible. Given this, the strangeness of synthesizing fake <kbd>Esc</kbd> keypresses does not have much to recommend it.
 
 ### Not gating on transient user activation
 
-We're gating the creation of more than one `CloseWatcher` on transient user activation as an [anti-abuse measure](#abuse-analysis). However, this protection is stronger than the existing protections against excessive `history.pushState()` use, which are are more vague and less mandatory in [that method's spec](https://html.spec.whatwg.org/multipage/history.html#dom-history-pushstate):
+We're gating the creation of more than one `CloseWatcher` on transient user activation as an [anti-abuse measure](#abuse-analysis). However, this protection is stronger than the existing protections against excessive `history.pushState()` use, which are more vague and less mandatory in [that method's spec](https://html.spec.whatwg.org/multipage/history.html#dom-history-pushstate):
 
 > Optionally, return. (For example, the user agent might disallow calls to these methods that are invoked on a timer, or from event listeners that are not triggered in response to a clear user action, or that are invoked in rapid succession.)
 
