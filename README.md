@@ -205,7 +205,7 @@ Our proposal is to replace the vague specification sentence above with [text bas
 
 - It makes it clear how `<dialog>`s interact with `CloseWatcher` instances: they both live in the same per-`Document` close watcher stack.
 
-- It drives interoperability in terms of user- and developer-facing `<dialog>` behavior by providing a more concrete specification, e.g. with regards to how the `<dialog>`'s `cancel` event is sequenced versus the `keydown` event for <kbd>Esc</kbd> keypresses.
+- It drives interoperability in terms of user- and developer-facing `<dialog>` behavior by providing a more concrete specification, e.g. with regards to how the `<dialog>`'s `cancel` event is sequenced versus the `keydown` event for <kbd>Esc</kbd> key presses.
 
 ### Integration with Fullscreen
 
@@ -235,7 +235,7 @@ Note that the line between "UI state" and "a navigation" can be blurry in single
 
 If we assume that developers already know to handle the <kbd>Esc</kbd> key to close their components, then we could potentially translate other close signals, like the Android back button, into <kbd>Esc</kbd> key presses. The hope is then that application and component developers wouldn't have to update their code at all: if they're doing the right thing for that common desktop close signal, they would suddenly start doing the right thing on other platforms as well. This is especially attractive as it could help avoid the awkward transition period mentioned in the [goals](#goals) section.
 
-However, upon reflection, such a solution doesn't really solve the general problem. Given an Android back button press, or a PlayStation square button press, or any other gesture which might serve multiple context-dependent purposes, the browser needs to know: should perform its usual action, or should it be translated to an <kbd>Esc</kbd> key press? For custom components, the only way to know is for the web developer to tell the browser that a close-signal-consuming component is open. So our goal of requiring no code modifications, or awkward transition period, is impossible. Given this, the strangeness of synthesizing fake <kbd>Esc</kbd> keypresses does not have much to recommend it.
+However, upon reflection, such a solution doesn't really solve the general problem. Given an Android back button press, or a PlayStation square button press, or any other gesture which might serve multiple context-dependent purposes, the browser needs to know: should perform its usual action, or should it be translated to an <kbd>Esc</kbd> key press? For custom components, the only way to know is for the web developer to tell the browser that a close-signal-consuming component is open. So our goal of requiring no code modifications, or awkward transition period, is impossible. Given this, the strangeness of synthesizing fake <kbd>Esc</kbd> key presses does not have much to recommend it.
 
 ### Not gating on transient user activation
 
@@ -259,7 +259,7 @@ Our current thinking is that we should produce both paths: we should work on bun
 
 ## Extension: allowing confirmation before closing
 
-A common developer request when we bring up these scenarios is to allow confirmation before closing a modal. For example, if filling out a form in a popup, they want to intercept any <kbd>Esc</kbd> keypresses or Android back button presses and ask "Are you sure you want to close this form and discard what you've entered?"
+A common developer request when we bring up these scenarios is to allow confirmation before closing a modal. For example, if filling out a form in a popup, they want to intercept any <kbd>Esc</kbd> key presses or Android back button presses and ask "Are you sure you want to close this form and discard what you've entered?"
 
 We've explored what this would look like in terms of extending the `CloseWatcher` API. The main difficulty is in preventing abuse by a malicious site. As such, we've punted on this for now, hoping to get a useful core API out first to solve (what we hope is) the 80% case. But see [this document](./confirmation.md) for details on what such an extension would look like.
 
