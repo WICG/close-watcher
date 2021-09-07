@@ -12,7 +12,7 @@
  *   - .toc for the Table of Contents (<ol class="toc">)
  *     + <span class="secno"> for the section numbers
  *   - #toc for the Table of Contents (<nav id="toc">)
- *   - ul.index for Indices (<a href="#ref">term</a><span>, in §N.M</span>)
+ *   - ul.index for Indices (<a href="#ref">term</a><span>, in § N.M</span>)
  *   - table.index for Index Tables (e.g. for properties or elements)
  *
  * Structural Markup
@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version bb6b91100, updated Mon Jul 12 16:52:37 2021 -0700" name="generator">
+  <meta content="Bikeshed version 4f053d00e, updated Tue Aug 10 14:13:32 2021 -0700" name="generator">
   <link href="https://domenic.github.io/close-watcher/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -2122,7 +2122,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Close Watcher API</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-13">13 July 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-09-07">7 September 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt class="editor">Editor:
@@ -2136,7 +2136,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 13 July 2021,
+In addition, as of 7 September 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2327,7 +2327,7 @@ Parts of this work may be from another specification document.  If so, those par
    </div>
    <h2 class="heading settled" data-level="2" id="patches"><span class="secno">2. </span><span class="content">Updates to other specifications</span><a class="self-link" href="#patches"></a></h2>
    <h3 class="heading settled" data-level="2.1" id="patch-fullscreen"><span class="secno">2.1. </span><span class="content">Fullscreen</span><a class="self-link" href="#patch-fullscreen"></a></h3>
-   <p>Replace the sentence about "If the end user instructs..." in <a href="https://fullscreen.spec.whatwg.org/#ui">Fullscreen API §4 UI</a> with the following:</p>
+   <p>Replace the sentence about "If the end user instructs..." in <a href="https://fullscreen.spec.whatwg.org/#ui"><cite>Fullscreen API</cite> § 4 UI</a> with the following:</p>
    <p>If the user initiates a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal③">close signal</a>, this will trigger the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen" id="ref-for-fully-exit-fullscreen①">fully exit fullscreen</a> algorithm as part of the <a data-link-type="dfn" href="#close-signal-steps" id="ref-for-close-signal-steps">close signal steps</a>. This takes precedence over any <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher④">close watchers</a>.</p>
    <h3 class="heading settled" data-level="2.2" id="patch-dialog"><span class="secno">2.2. </span><span class="content">The <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="ref-for-the-dialog-element">dialog</a></code> element</span><a class="self-link" href="#patch-dialog"></a></h3>
    <p>Update <cite>HTML</cite>’s <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="termref-for-the-dialog-element">The <code>dialog</code> element</a> section as follows: <a data-link-type="biblio" href="#biblio-html">[HTML]</a></p>
@@ -2489,30 +2489,30 @@ Parts of this work may be from another specification document.  If so, those par
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#close-watcher-blocks-further-developer-controlled-close-watchers">blocks further developer-controlled close watchers</a><span>, in §1.1</span>
-   <li><a href="#cancel-the-dialog">cancel the dialog</a><span>, in §2.2</span>
-   <li><a href="#can-create-a-developer-controlled-close-watcher">can create a developer-controlled close watcher</a><span>, in §1.1</span>
-   <li><a href="#can-create-a-developer-controlled-close-watcher">cannot create a developer-controlled close watcher</a><span>, in §1.1</span>
-   <li><a href="#eventdef-closewatcher-close">close</a><span>, in §1.2</span>
-   <li><a href="#close-watcher-close-action">close action</a><span>, in §1.1</span>
-   <li><a href="#close-signal">close signal</a><span>, in §1</span>
-   <li><a href="#close-signal-steps">close signal steps</a><span>, in §1</span>
-   <li><a href="#close-watcher">close watcher</a><span>, in §1.1</span>
-   <li><a href="#closewatcher">CloseWatcher</a><span>, in §1.2</span>
-   <li><a href="#dom-closewatcher-closewatcher">CloseWatcher()</a><span>, in §1.2</span>
-   <li><a href="#close-watcher-stack">close watcher stack</a><span>, in §1.1</span>
-   <li><a href="#dom-closewatcher-closewatcher">constructor()</a><span>, in §1.2</span>
-   <li><a href="#dom-closewatcher-destroy">destroy()</a><span>, in §1.2</span>
-   <li><a href="#closewatcher-is-active">is active</a><span>, in §1.2</span>
-   <li><a href="#close-watcher-is-still-valid">is still valid</a><span>, in §1.1</span>
-   <li><a href="#dom-closewatcher-onclose">onclose</a><span>, in §1.2</span>
+   <li><a href="#close-watcher-blocks-further-developer-controlled-close-watchers">blocks further developer-controlled close watchers</a><span>, in § 1.1</span>
+   <li><a href="#cancel-the-dialog">cancel the dialog</a><span>, in § 2.2</span>
+   <li><a href="#can-create-a-developer-controlled-close-watcher">can create a developer-controlled close watcher</a><span>, in § 1.1</span>
+   <li><a href="#can-create-a-developer-controlled-close-watcher">cannot create a developer-controlled close watcher</a><span>, in § 1.1</span>
+   <li><a href="#eventdef-closewatcher-close">close</a><span>, in § 1.2</span>
+   <li><a href="#close-watcher-close-action">close action</a><span>, in § 1.1</span>
+   <li><a href="#close-signal">close signal</a><span>, in § 1</span>
+   <li><a href="#close-signal-steps">close signal steps</a><span>, in § 1</span>
+   <li><a href="#close-watcher">close watcher</a><span>, in § 1.1</span>
+   <li><a href="#closewatcher">CloseWatcher</a><span>, in § 1.2</span>
+   <li><a href="#dom-closewatcher-closewatcher">CloseWatcher()</a><span>, in § 1.2</span>
+   <li><a href="#close-watcher-stack">close watcher stack</a><span>, in § 1.1</span>
+   <li><a href="#dom-closewatcher-closewatcher">constructor()</a><span>, in § 1.2</span>
+   <li><a href="#dom-closewatcher-destroy">destroy()</a><span>, in § 1.2</span>
+   <li><a href="#closewatcher-is-active">is active</a><span>, in § 1.2</span>
+   <li><a href="#close-watcher-is-still-valid">is still valid</a><span>, in § 1.1</span>
+   <li><a href="#dom-closewatcher-onclose">onclose</a><span>, in § 1.2</span>
    <li>
     signal close
     <ul>
-     <li><a href="#signal-close">definition of</a><span>, in §1.1</span>
-     <li><a href="#closewatcher-signal-close">dfn for CloseWatcher</a><span>, in §1.2</span>
+     <li><a href="#signal-close">definition of</a><span>, in § 1.1</span>
+     <li><a href="#closewatcher-signal-close">dfn for CloseWatcher</a><span>, in § 1.2</span>
     </ul>
-   <li><a href="#dom-closewatcher-signalclose">signalClose()</a><span>, in §1.2</span>
+   <li><a href="#dom-closewatcher-signalclose">signalClose()</a><span>, in § 1.2</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-document">
    <a href="https://dom.spec.whatwg.org/#document">https://dom.spec.whatwg.org/#document</a><b>Referenced in:</b>
@@ -2835,17 +2835,17 @@ Parts of this work may be from another specification document.  If so, those par
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-dom">[DOM]
-   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
+   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-fullscreen">[FULLSCREEN]
-   <dd>Philip Jägenstedt. <a href="https://fullscreen.spec.whatwg.org/">Fullscreen API Standard</a>. Living Standard. URL: <a href="https://fullscreen.spec.whatwg.org/">https://fullscreen.spec.whatwg.org/</a>
+   <dd>Philip Jägenstedt. <a href="https://fullscreen.spec.whatwg.org/"><cite>Fullscreen API Standard</cite></a>. Living Standard. URL: <a href="https://fullscreen.spec.whatwg.org/">https://fullscreen.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
-   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-infra">[INFRA]
-   <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/">Infra Standard</a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
+   <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/"><cite>Infra Standard</cite></a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
    <dt id="biblio-ui-events">[UI-EVENTS]
-   <dd>Gary Kacmarcik; Travis Leithead; Doug Schepers. <a href="https://w3c.github.io/uievents/">UI Events</a>. URL: <a href="https://w3c.github.io/uievents/">https://w3c.github.io/uievents/</a>
+   <dd>Gary Kacmarcik; Travis Leithead; Doug Schepers. <a href="https://w3c.github.io/uievents/"><cite>UI Events</cite></a>. URL: <a href="https://w3c.github.io/uievents/">https://w3c.github.io/uievents/</a>
    <dt id="biblio-webidl">[WebIDL]
-   <dd>Boris Zbarsky. <a href="https://heycam.github.io/webidl/">Web IDL</a>. URL: <a href="https://heycam.github.io/webidl/">https://heycam.github.io/webidl/</a>
+   <dd>Boris Zbarsky. <a href="https://heycam.github.io/webidl/"><cite>Web IDL</cite></a>. URL: <a href="https://heycam.github.io/webidl/">https://heycam.github.io/webidl/</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL Index</span><a class="self-link" href="#idl-index"></a></h2>
 <pre class="idl highlight def">[<a class="idl-code" data-link-type="extended-attribute" href="https://heycam.github.io/webidl/#Exposed"><c- g>Exposed</c-></a>=<c- n>Window</c->]
