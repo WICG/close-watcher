@@ -107,7 +107,7 @@ In an [=implementation-defined=] (and likely device-specific) manner, a user can
 Whenever the user agent receives a potential close signal targeted at a {{Document}} |document|, it must perform the following <dfn export>close signal steps</dfn>:
 
 1. If |document|'s [=fullscreen element=] is non-null, then <a spec="FULLSCREEN">fully exit fullscreen</a> and return.
-   <p class="note">This does <em>not</em> fire any relevant event, such as {{keydown}}; it only fires fullscreenchange. <!-- TODO {{fullscreenchange}} once https://github.com/whatwg/fullscreen/pull/195 lands. -->
+   <p class="note">This does <em>not</em> fire any relevant event, such as {{keydown}}; it only fires {{Document/fullscreenchange}}.
 1. Fire any relevant event, per <cite>UI Events</cite> or other relevant specifications. [[!UI-EVENTS]]
 1. If such an event was fired, and its [=Event/canceled flag=] is set, then return.
 1. If such an event was fired, then perform the following steps within the same task as that event was fired in, immediately after firing the event. Otherwise, [=queue a global task=] on the [=user interaction task source=] given |document|'s [=relevant global object=] to perform the following steps.
