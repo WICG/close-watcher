@@ -166,7 +166,7 @@ In detail, a malicious page which wants to trap the user would be able to do at 
 
 Other variations are possible; e.g. if the user activates the page once, the abusive page could create two `CloseWatcher`s instead of one, but then it wouldn't get `cancel` events, so three back button presses would still escape the abusive page.
 
-Similarly, if the user activates the page <var>N</var> times, a maximally-abusive page could make it take <var>N</var> + 2 back button presses to escape.
+In general, if the user activates the page <var>N</var> times, a maximally-abusive page could make it take <var>N</var> + 2 back button presses to escape.
 
 Compare this to the protection in place today for the `history.pushState()` API, which is another means by which apps can attempt to trap the user on the page by making their session history list grow. In [the spec](https://html.spec.whatwg.org/#shared-history-push/replace-state-steps), there is an optional step that allows the user agent to ignore these method calls; in practice, this is only done as a throttling measure to avoid hundreds of calls per second overwhelming the history state storage implementations.
 
