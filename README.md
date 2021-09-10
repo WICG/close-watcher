@@ -35,15 +35,13 @@ Our primary goals are as follows:
 
 - Specify uniform-per-platform behavior across existing platform-provided components, e.g. `<dialog>`, `<input>` pickers, and fullscreen. (For example: currently the back button on Android does not close modal `<dialog>`s, but instead navigates history. It does close `<input>` pickers and close fullscreen.)
 
+- Allow the developer to confirm a close signal with the user, to avoid potential data loss. (E.g., "are you sure you want to close this dialog?")
+
 - Explain `<dialog>`'s existing `close` and `cancel` events in terms of this model.
 
 The following is a goal we wish we could meet, but don't believe is possible to meet while also achieving our primary goals:
 
 - Avoid an awkward transition period, where the Android back button closes components on sites that adopt this new API, but navigates history on sites that haven't adopted it. In particular, right now users generally know the Android back button fails to close modals in web apps and avoid it when modals are open; we worry about this API causing a state where users are no longer sure which action it performs.
-
-The following is a goal we think is probably desirable, but the additional complexity makes us want to pursue it in a [future extension](#extension-allowing-confirmation-before-closing):
-
-- Allow the developer to confirm a close signal, in a similar fashion to `beforeunload`, to avoid potential data loss.
 
 ## What developers are doing today
 
@@ -123,11 +121,58 @@ deduplicating the `myModal.close()` call by having the developer put all their c
 
 As usual, reaching the `close` event will inactivate the `CloseWatcher`, meaning it receives no further events in the future and it no longer occupies the "free `CloseWatcher` slot", if it was previously doing so.
 
+### Asking for confirmation
+
+There's a more advanced part of this API, which allows asking the user for confirmation if they really want to close the modal. This is useful in cases where, e.g., the modal contains a form with unsaved data. The usage looks like the following:
+
+```js
+watcher.oncancel = async (e) => {
+  if (hasUnsavedData) {
+    e.preventDefault();
+
+    const userReallyWantsToClose = await askForConfirmation("Are you sure you want to close this dialog?");
+    if (userReallyWantsToClose) {
+      hasUnsavedData = false;
+      watcher.signalClose();
+    }
+  }
+};
+```
+
+_Note: the name of this event, i.e. `cancel` instead of something like `beforeclose`, is chosen to match `<dialog>`, which has the same two-tier `cancel` + `close` event sequence._
+
+For abuse prevention purposes, this event only fires if the page has received user activation. Furthermore, once it fires for one `CloseWatcher` instance, it will not fire again for any `CloseWatcher` instances until the page again gets user activation. This ensures that if the user sends a close signal twice in a row without any intervening user activation, the signal definitely goes through, destroying the `CloseWatcher`.
+
+Note that the `cancel` event is not fired when the user navigates away from the page: i.e., it has no overlap with `beforeunload`. `beforeunload` remains the best way to confirm a page unload, with `cancel` only used for confirming a close signal.
+
+If called from within transient user activation, `watcher.signalClosed()` also invokes `cancel` event handlers, which would trigger event listeners like the above example code. If called without user activation, then it skips straight to the `close` event.
+
 ### Abuse analysis
 
-As discussed [above](#user-activation-gating), for platforms like Android where the close signal is to use the back button, we need to prevent abuse that traps the user on a page by effectively disabling their back button. The user activation gating is intended to combat that. Notably, that protection is already stronger than anything done today for the `history.pushState()` API, which is another means by which apps can attempt to trap the user on the page. [See discussion below](#not-gating-on-transient-user-activation) for more on that.
+As discussed [above](#user-activation-gating), for platforms like Android where the close signal is to use the back button, we need to prevent abuse that traps the user on a page by effectively disabling their back button. The user activation gating is intended to combat that.
 
-Additionally, we note that in most back button UIs, the user always has an escape hatch of holding down the back button and explicitly choosing a history step to navigate back to. This is never a close signal.
+In detail, a malicious page which wants to trap the user would be able to do at most the following using the `CloseWatcher` API:
+
+- If the user never interacts with the page:
+  - Create its "free" (i.e., not user-activation-gated) `CloseWatcher`
+  - The first Android back button press would destroy the `CloseWatcher`
+  - The second Android back button press would navigate back through the joint session history, escaping the abusive page
+- If the user activates the page once:
+  - Create its free `CloseWatcher` at page start
+  - Install a `cancel` event handler that calls `event.preventDefault()`
+  - The first Android back button press would hit the `cancel` event, which calls `event.preventDefault()`, and thus does nothing
+  - The second Android back button press would ignore the `cancel` event, and destroy the `CloseWatcher`
+  - The third Android back button press would navigate back through the joint session history, escaping the abusive page
+
+Other variations are possible; e.g. if the user activates the page once, the abusive page could create two `CloseWatcher`s instead of one, but then it wouldn't get `cancel` events, so three back button presses would still escape the abusive page.
+
+Similarly, if the user activates the page <var>N</var> times, a maximally-abusive page could make it take <var>N</var> + 2 back button presses to escape.
+
+Compare this to the protection in place today for the `history.pushState()` API, which is another means by which apps can attempt to trap the user on the page by making their session history list grow. In [the spec](https://html.spec.whatwg.org/#shared-history-push/replace-state-steps), there is an optional step that allows the user agent to ignore these method calls; in practice, this is only done as a throttling measure to avoid hundreds of calls per second overwhelming the history state storage implementations.
+
+Another mitigation that browsers implement against `history.pushState()`-based trapping is to try to have the actual back button UI skip entries that were added without user activation, i.e., to have it behave differently from `history.back()` (which will not skip such entries). Such attempts [are a bit buggy](https://bugs.chromium.org/p/chromium/issues/detail?id=1248529), but in theory they woud mean an abusive page that is activated <var>N</var> times would require <var>N</var> back button presses to escape. We believe that the additional capabilities allowed here are worth expanding this number from <var>N</var> to <var>N</var> + 2, especially given how unevenly these mitigations are currently implemented and how that hasn't led to significant user complaints.
+
+Finally, we note that in most browser UIs, the user has an escape hatch of holding down the back button and explicitly choosing a history step to navigate back to. Or, closing the tab entirely. These are never a close signal.
 
 ### Realistic examples
 
@@ -159,6 +204,8 @@ hamburgerMenuButton.addEventListener('click', () => {
 });
 ```
 
+Note that it never really makes sense to use the `cancel` event for a sidebar.
+
 #### A picker
 
 For a "picker" control that wants to close itself on a user-provided close signal, code like the following would work:
@@ -189,6 +236,8 @@ class MyPicker extends HTMLElement {
 }
 ```
 
+Similarly, picker UIs do not usually require confirmation on closing, so do not need `cancel` event handlers.
+
 ## Platform close signals
 
 With `CloseWatcher` as a foundation, we can work to unify the web platform's existing and upcoming close signals:
@@ -199,9 +248,9 @@ The `<dialog>` spec today states that "user agents may provide a user interface 
 
 The existing `<dialog>` implementation in Chromium implements this, but only with with <kbd>Esc</kbd> key on desktop. That is, on Android Chromium, the system back button will not close `<dialog>`s. (Perhaps this is because of the fears about back button trapping mentioned above?)
 
-Our proposal is to replace the vague specification sentence above with [text based on close watchers](https://domenic.github.io/close-watcher/#patch-dialog). This has a number of benefits:
+Our proposal is to replace the vague specification sentence above with [text based on close watchers](https://wicg.github.io/close-watcher/#patch-dialog). This has a number of benefits:
 
-- It allows the Android back button to close dialogs, subject to anti-abuse restrictions (e.g. the call to `dialogEl.showModal()` must be done with user activation or use up the free close watcher slot).
+- It allows the Android back button to close dialogs, subject to anti-abuse restrictions. That is: the call to `dialogEl.showModal()` must be done with user activation or use up the free close watcher slot; and the `cancel` event will only fire if there's been an intervening user interaction.
 
 - It makes it clear how `<dialog>`s interact with `CloseWatcher` instances: they both live in the same per-`Document` close watcher stack.
 
@@ -211,7 +260,7 @@ Our proposal is to replace the vague specification sentence above with [text bas
 
 The Fullscreen spec today states "If the end user instructs the user agent to end a fullscreen session initiated via `requestFullscreen()`, fully exit fullscreen". Existing Fullscreen implementations implement this using the <kbd>Esc</kbd> key on desktop, the back button on Android, and a floating software "x" button on iPadOS. (iOS on iPhones does not appear to implement the fullscreen API.)
 
-We propose replacing this with [explicit integration into the close signal steps](https://domenic.github.io/close-watcher/#close-signal-steps). Again, this gives interoperability benefits by using a shared primitive, and a clear specification for how it interacts with `<dialog>`s, `CloseWatcher`s, and key events.
+We propose replacing this with [explicit integration into the close signal steps](https://wicg.github.io/close-watcher/#close-signal-steps). Again, this gives interoperability benefits by using a shared primitive, and a clear specification for how it interacts with `<dialog>`s, `CloseWatcher`s, and key events.
 
 ### Integration with `<popup>`
 
@@ -237,17 +286,13 @@ If we assume that developers already know to handle the <kbd>Esc</kbd> key to cl
 
 However, upon reflection, such a solution doesn't really solve the general problem. Given an Android back button press, or a PlayStation square button press, or any other gesture which might serve multiple context-dependent purposes, the browser needs to know: should perform its usual action, or should it be translated to an <kbd>Esc</kbd> key press? For custom components, the only way to know is for the web developer to tell the browser that a close-signal-consuming component is open. So our goal of requiring no code modifications, or awkward transition period, is impossible. Given this, the strangeness of synthesizing fake <kbd>Esc</kbd> key presses does not have much to recommend it.
 
-### Not gating on transient user activation
+### Browser-mediated confirmation dialogs
 
-We're gating the creation of more than one `CloseWatcher` on transient user activation as an [anti-abuse measure](#abuse-analysis). However, this protection is stronger than the existing protections against excessive `history.pushState()` use, which are more vague and less mandatory in [that method's spec](https://html.spec.whatwg.org/multipage/history.html#dom-history-pushstate):
+[Previous iterations of this proposal](https://github.com/WICG/close-watcher/blob/5233b324f3b45e867d7e0a9fd02566d532fec850/confirmation.md) had a different semantic for the `cancel` event, where calling `event.preventDefault()` would show non-configurable browser UI asking to confirm closing the modal.
 
-> Optionally, return. (For example, the user agent might disallow calls to these methods that are invoked on a timer, or from event listeners that are not triggered in response to a clear user action, or that are invoked in rapid succession.)
+The benefit of this approach is that, because the browser directly gets a signal from the user when the user says "Yes, close anyway", we can reduce the number of Android back button clicks that [abusive pages](#abuse-analysis) can trap from <var>N</var> + 2 to <var>N</var> + 1. However, on balance this isn't actually a big win, because the user still has to perform <var>N</var> + 2 actions to escape: <var>N</var> + 1 back button presses, and one "Yes, close anyway" press.
 
-We could gate the creation of `CloseWatcher` on similarly-vague and optional protections. This would allow more free use of it, especially on platforms that don't use the back button as a close signal and so don't need the abuse protection.
-
-But on balance, we'd prefer to start with the transient user activation restriction (plus one "free" `CloseWatcher`), mainly for reasons of interoperability. Allowing platforms to differ in when `CloseWatcher`s can be created would potentially create a race to the bottom, where nobody can be stricter than the most widely-used implementation.
-
-A potentially-viable alternative would be to try to standardize the anti-abuse measures that browsers are currently doing for `history.pushState()`, and then use them to underlie close watchers as well. We're definitely open to this idea.
+Additionally, some early feedback we got was that custom in-page confirmation UI was very desirable for web developers, instead of non-configurable browser UI.
 
 ### Bundling this with high-level APIs
 
@@ -256,14 +301,6 @@ The proposal here exposes `CloseWatcher` as a primitive. However, watching for c
 Instead of providing the individual building blocks for all of these pieces, it may be better to bundle them together into high-level semantic elements. We already have `<dialog>`; we could imagine others such as `<popup>`, `<toast>`, `<tooltip>`, `<sidebar>`, etc. These would then bundle the appropriate features, e.g. while all of them would benefit from top layer interaction, `<toast>` and `<tooltip>` do not need to handle close signals. One such proposal in this area is the [`<popup>` explainer](https://open-ui.org/components/popup.research.explainer).
 
 Our current thinking is that we should produce both paths: we should work on bundled high-level APIs, such as the existing `<dialog>` and the upcoming `<popup>`, but we should also work on lower-level components, such as close signals or top layer management or focus trapping. And we should, as this document [tries to do](#platform-close-signals), ensure these build on top of each other. This gives authors more flexibility for creating their own novel components, without waiting to convince implementers of the value of baking their high-level component into the platform, while still providing an evolutionary path for evolving the built-in control set over time.
-
-## Extension: allowing confirmation before closing
-
-A common developer request when we bring up these scenarios is to allow confirmation before closing a modal. For example, if filling out a form in a popup, they want to intercept any <kbd>Esc</kbd> key presses or Android back button presses and ask "Are you sure you want to close this form and discard what you've entered?"
-
-We've explored what this would look like in terms of extending the `CloseWatcher` API. The main difficulty is in preventing abuse by a malicious site. As such, we've punted on this for now, hoping to get a useful core API out first to solve (what we hope is) the 80% case. But see [this document](./confirmation.md) for details on what such an extension would look like.
-
-We'd especially welcome feedback to confirm or disconfirm our intuition that the no-confirmation case is more prevalent. For example, if you are able to survey the modals in your application and look at how many of them would need confirm functionality versus how many would not, that would be great data to share on the issue tracker.
 
 ## Security and privacy considerations
 
@@ -280,7 +317,7 @@ See the [W3C TAG Security and Privacy Questionnaire answers](./security-privacy-
   - Chromium: Positive; prototyped behind a flag
   - Gecko: No feedback so far
   - WebKit: No feedback so far
-- Web developers: TODO
+- Web developers: [some positive signals](https://github.com/WICG/proposals/issues/18); see also [this comment](https://github.com/w3ctag/design-reviews/issues/594#issuecomment-890257686)
 
 ## Acknowledgments
 
