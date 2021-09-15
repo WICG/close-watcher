@@ -163,6 +163,7 @@ interface CloseWatcher : EventTarget {
   undefined destroy();
   undefined signalClose();
 
+  attribute EventHandler oncancel;
   attribute EventHandler onclose;
 };
 </xmp>
@@ -172,7 +173,7 @@ interface CloseWatcher : EventTarget {
   <dd>
     <p>Attempts to create a new {{CloseWatcher}} instance.
 
-    <p>If a {{CloseWatcher}} is already active, then this will instead throw a "{{NotAllowedError}}" {{DOMException}}.
+    <p>If a {{CloseWatcher}} is already active, and the {{Window}} does not have [=transient activation|transient user activation=], then this will instead throw a "{{NotAllowedError}}" {{DOMException}}.
   </dd>
 
   <dt><code><var ignore>watcher</var>.{{CloseWatcher/destroy()|destroy}}()</code></dt>
@@ -203,20 +204,23 @@ Each {{CloseWatcher}} has an <dfn for="CloseWatcher">is active</dfn>, which is a
     * [=close watcher/blocks further developer-controlled close watchers=] being true
 </div>
 
-<div algorithm>
+<p algorithm>
   The <dfn method for="CloseWatcher">destroy()</dfn> method steps are to set [=this=]'s [=CloseWatcher/is active=] to false.
-</div>
+</p>
 
-<div algorithm>
+<p algorithm>
   The <dfn method for="CloseWatcher">signalClose()</dfn> method steps are to [=CloseWatcher/signal close=] on [=this=].
-</div>
+</p>
 
-Objects implementing the {{CloseWatcher}} interface must support the <dfn attribute for="CloseWatcher">onclose</dfn> [=event handler IDL attribute=], whose [=event handler event type=] is <dfn event for="CloseWatcher">close</dfn>.
+Objects implementing the {{CloseWatcher}} interface must support the <dfn attribute for="CloseWatcher">oncancel</dfn> and <dfn attribute for="CloseWatcher">onclose</dfn> [=event handler IDL attribute=], whose [=event handler event types=] are respectively <dfn event for="CloseWatcher">cancel</dfn> and <dfn event for="CloseWatcher">close</dfn>.
 
 <div algorithm>
   To <dfn for="CloseWatcher">signal close</dfn> on a {{CloseWatcher}} |closeWatcher|:
 
   1. If |closeWatcher|'s [=CloseWatcher/is active=] is false, then return.
+  1. If TODO something about user activation:
+    1. Let |continue| be the result of [=firing an event=] named {{CloseWatcher/cancel}} at |closeWatcher|, with the {{Event/cancelable}} attribute initialized to true.
+    1. If |continue| is false, then return.
   1. [=Fire an event=] named {{CloseWatcher/close}} at |closeWatcher|.
   1. Set |closeWatcher|'s [=CloseWatcher/is active=] to false.
 </div>
@@ -247,7 +251,9 @@ Replace the "Canceling dialogs" section entirely with the following definition. 
 <div algorithm>
   To <dfn>cancel the dialog</dfn> |dialog|:
 
-  1. Let |close| be the result of [=firing an event=] named {{HTMLElement/cancel}} at |dialog|, with the {{Event/cancelable}} attribute initialized to true.
+  1. Let |close| be true.
+
+  1. If TODO something about user activation, then set |close| to the result of [=firing an event=] named {{HTMLElement/cancel}} at |dialog|, with the {{Event/cancelable}} attribute initialized to true.
 
   1. If |close| is true and |dialog| has an <{dialog/open}> content attribute, then <a spec="HTML" lt="close">close the dialog</a> |dialog| with no return value.
 </div>
