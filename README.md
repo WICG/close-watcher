@@ -166,19 +166,20 @@ In detail, a malicious page which wants to trap the user would be able to do at 
 
 Other variations are possible; e.g. if the user activates the page once, the abusive page could create two `CloseWatcher`s instead of one, but then it wouldn't get `cancel` events, so three back button presses would still escape the abusive page.
 
-In general, if the user activates the page <var>N</var> times, a maximally-abusive page could make it take <var>N</var> + 3 back button presses to escape.
+In general, if the user activates the page <var>N</var> times, a maximally-abusive page could make it take <var>N</var> + 2 back button presses to escape.
 
 Compare this to the protection in place today for the `history.pushState()` API, which is another means by which apps can attempt to trap the user on the page by making their session history list grow. In [the spec](https://html.spec.whatwg.org/#shared-history-push/replace-state-steps), there is an optional step that allows the user agent to ignore these method calls; in practice, this is only done as a throttling measure to avoid hundreds of calls per second overwhelming the history state storage implementations.
 
 Another mitigation that browsers implement against `history.pushState()`-based trapping is to try to have the actual back button UI skip entries that were added without user activation, i.e., to have it behave differently from `history.back()` (which will not skip such entries). Such attempts [are a bit buggy](https://bugs.chromium.org/p/chromium/issues/detail?id=1248529), but in theory they woud mean an abusive page that is activated <var>N</var> times would require <var>N</var> + 1 back button presses to escape.
 
-We believe that the additional capabilities allowed here are worth expanding this number from <var>N</var> + 1 to <var>N</var> + 3, especially given how unevenly these mitigations are currently implemented and how that hasn't led to significant user complaints. However, there are a number of alternatives discussed below which would allow us to lower this number:
+We believe that the additional capabilities allowed here are worth expanding this number from <var>N</var> + 1 to <var>N</var> + 2, especially given how unevenly these mitigations are currently implemented and how that hasn't led to significant user complaints. However, there are a number of alternatives discussed below which would allow us to lower this number:
 
-- [Browser-mediated confirmation dialogs](#browser-mediated-confirmation-dialogs) would reduce the number of Android back button presses by 1, although it would replace it with another press.
-- [No confirmation dialogs](#no-confirmation-dialogs) would reduce the number of Android back button presses by 1.
 - [No free close watcher](#no-free-close-watcher) would reduce the number of Android back button presses by 1.
+- [Browser-mediated confirmation dialogs](#browser-mediated-confirmation-dialogs) would reduce the number of Android back button presses by 1, although it would replace it with another press.
 
-For now we are sticking with the current proposal and its <var>N</var> + 3 number, but welcome discussion from the community as to whether this is the right tradeoff.
+Note that [no confirmation dialogs](#no-confirmation-dialogs) would not reduce the number, since in our current design the user activations are shared between `CloseWatcher` creation and the `cancel` event, so removing just the `cancel` event does not change the calculus.
+
+For now we are sticking with the current proposal and its <var>N</var> + 2 number, but welcome discussion from the community as to whether this is the right tradeoff.
 
 Finally, we note that in most browser UIs, the user has an escape hatch of holding down the back button and explicitly choosing a history step to navigate back to. Or, closing the tab entirely. These are never a close signal.
 
@@ -298,13 +299,15 @@ However, upon reflection, such a solution doesn't really solve the general probl
 
 [Previous iterations of this proposal](https://github.com/WICG/close-watcher/blob/5233b324f3b45e867d7e0a9fd02566d532fec850/confirmation.md) had a different semantic for the `cancel` event, where calling `event.preventDefault()` would show non-configurable browser UI asking to confirm closing the modal.
 
-The benefit of this approach is that, because the browser directly gets a signal from the user when the user says "Yes, close anyway", we can reduce the number of Android back button clicks that [abusive pages](#abuse-analysis) can trap from <var>N</var> + 3 to <var>N</var> + 2. However, on balance this isn't actually a big win, because the user still has to perform <var>N</var> + 3 actions to escape: <var>N</var> + 2 back button presses, and one "Yes, close anyway" press.
+The benefit of this approach is that, because the browser directly gets a signal from the user when the user says "Yes, close anyway", we can reduce the number of Android back button clicks that [abusive pages](#abuse-analysis) can trap from <var>N</var> + 2 to <var>N</var> + 1. However, on balance this isn't actually a big win, because the user still has to perform <var>N</var> + 2 actions to escape: <var>N</var> + 1 back button presses, and one "Yes, close anyway" press.
 
 Additionally, some early feedback we got was that custom in-page confirmation UI was very desirable for web developers, instead of non-configurable browser UI.
 
 ### No confirmation dialogs
 
-It's also possible to start with a version of this proposal that does not fire a `cancel` event at all. This means that pressing the Android back button will always destroy the close watcher, so escaping [an abusive page](#abuse-analysis) takes at most <var>N</var> + 2 back button presses instead of the current proposal's <var>N</var> + 3.
+It's also possible to start with a version of this proposal that does not fire a `cancel` event at all. This means that pressing the Android back button will always destroy the close watcher.
+
+However, by itself this this doesn't change what it takes to escape an [an abusive page](#abuse-analysis): it still takes <var>N</var> + 2 Android back button presses, since a maximally-abusive page will just take advantage of user activation to create new `CloseWatcher` instances, instead of bothering with `cancel` events.
 
 In talking with web developers, this variant of the proposal was not as preferable:
 
@@ -316,7 +319,7 @@ In talking with web developers, this variant of the proposal was not as preferab
 
 As discussed [above](#user-activation-gating), this proposal gives pages the ability to create one "free" `CloseWatcher`, without user activation. This is meant for cases like session inactivity timeout dialogs or urgent notifications of server-triggered events that want a presentation that is closable with a close signal. However, it comes with a cost in terms of allowing [abusive pages](#abuse-analysis) to add 1 to the number of Android back button presses necessary to escape.
 
-We could remove this ability from the proposal, making it impossible to construct `CloseWatcher`s without user activation. This would reduce the number of Android back button presses by 1, from <var>N</var> + 3 to <var>N</var> + 2. (Or from <var>N</var> + 2 to <var>N</var> + 1, if combined with [no confirmation dialogs](#no-confirmation-dialogs)).
+We could remove this ability from the proposal, making it impossible to construct `CloseWatcher`s without user activation. This would reduce the number of Android back button presses by 1, from <var>N</var> + 2 to <var>N</var> + 1.
 
 ### Bundling this with high-level APIs
 
