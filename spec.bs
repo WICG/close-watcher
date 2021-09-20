@@ -200,6 +200,7 @@ Each {{CloseWatcher}} has an <dfn for="CloseWatcher">is active</dfn>, which is a
 <div algorithm>
   The <dfn constructor for="CloseWatcher" lt="CloseWatcher()">new CloseWatcher()</dfn> constructor steps are:
 
+  1. If [=this=]'s [=relevant global object=]'s [=associated Document=] is not [=Document/fully active=], then throw an "{{InvalidStateError}}" {{DOMException}}.
   1. If we [=cannot create a developer-controlled close watcher=] for [=this=]'s [=relevant global object=]'s [=associated document=], then throw a "{{NotAllowedError}}" {{DOMException}}.
   1. Set [=this=]'s [=CloseWatcher/is active=] to true.
   1. [=stack/Push=] a new [=close watcher=] on [=this=]'s [=relevant global object=]'s [=associated document=]'s [=close watcher stack=], with its [=struct/items=] set as follows:
@@ -224,11 +225,11 @@ Objects implementing the {{CloseWatcher}} interface must support the <dfn attrib
 
   1. If |closeWatcher|'s [=CloseWatcher/is active=] is false, then return.
   1. Let |window| be |closeWatcher|'s [=relevant global object=].
-  1. If |window|'s [=timestamp of last activation used for close watchers=] does not equal |window|'s <a spec="HTML">last activation timestamp</a>, then:
+  1. If |window|'s [=associated Document=] is [=Document/fully active=], and |window|'s [=timestamp of last activation used for close watchers=] does not equal |window|'s <a spec="HTML">last activation timestamp</a>, then:
     1. Let |shouldContinue| be the result of [=firing an event=] named {{CloseWatcher/cancel}} at |closeWatcher|, with the {{Event/cancelable}} attribute initialized to true.
     1. Set |window|'s [=timestamp of last activation used for close watchers=] to |window|'s <a spec="HTML">last activation timestamp</a>.
     1. If |shouldContinue| is false, then return.
-  1. [=Fire an event=] named {{CloseWatcher/close}} at |closeWatcher|.
+  1. If |window|'s [=associated Document=] is [=Document/fully active=], then [=fire an event=] named {{CloseWatcher/close}} at |closeWatcher|.
   1. Set |closeWatcher|'s [=CloseWatcher/is active=] to false.
 </div>
 
