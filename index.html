@@ -4,7 +4,7 @@
   <title>Close Watcher API</title>
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <link href="https://www.w3.org/StyleSheets/TR/2016/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version e8cbf4ed2, updated Fri Sep 10 10:21:28 2021 -0700" name="generator">
+  <meta content="Bikeshed version a210b7d86, updated Thu Sep 16 13:45:19 2021 -0700" name="generator">
   <link href="https://wicg.github.io/close-watcher/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -639,7 +639,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Close Watcher API</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2021-09-10">10 September 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2021-09-20">20 September 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt class="editor">Editor:
@@ -696,6 +696,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
      <ol class="toc">
       <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
+      <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
      </ol>
     <li><a href="#idl-index"><span class="secno"></span> <span class="content">IDL Index</span></a>
    </ol>
@@ -742,6 +743,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p class="example" id="example-android-back-sequence"><a class="self-link" href="#example-android-back-sequence"></a>On Android where the back button is a potential close signal, no event is involved, so when the user agent determines that the back button represents a close signal, it <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">queues a task</a> to <a data-link-type="dfn" href="#signal-close" id="ref-for-signal-close②">signal close</a>. If there is a <a data-link-type="dfn" href="#close-watcher-is-still-valid" id="ref-for-close-watcher-is-still-valid">still-valid</a> <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher">close watcher</a>, then that will get triggered; otherwise, the user agent will interpret the back button press as a request to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/history.html#traverse-the-history-by-a-delta" id="ref-for-traverse-the-history-by-a-delta">traverse the history by a delta</a> of −1. </p>
    <h3 class="heading settled" data-level="1.1" id="close-watchers"><span class="secno">1.1. </span><span class="content">Close watcher infrastructure</span><a class="self-link" href="#close-watchers"></a></h3>
    <p>Each <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code> has a <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="close-watcher-stack">close watcher stack</dfn>, a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#stack" id="ref-for-stack">stack</a> of <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher①">close watchers</a>, initially empty.</p>
+   <p>Each <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window">Window</a></code> has a <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="timestamp-of-last-activation-used-for-close-watchers">timestamp of last activation used for close watchers</dfn>. This is either a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/hr-time-2/#dom-domhighrestimestamp" id="ref-for-dom-domhighrestimestamp">DOMHighResTimeStamp</a></code> value, positive infinity, or negative infinity (i.e. the same value space as the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp" id="ref-for-last-activation-timestamp">last activation timestamp</a>). It is initially positive infinity.</p>
+   <p class="note" role="note">This value is used to ensure that a given user activation only enables a single <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher">CloseWatcher</a></code> <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-cancel" id="ref-for-eventdef-closewatcher-cancel">cancel</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="ref-for-the-dialog-element">dialog</a></code> <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel" id="ref-for-event-cancel">cancel</a></code> event to be fired, per user activation. This is different than requiring <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation">transient activation</a> to fire the event, because we want to allow the event to happen arbitrarily long after the user activation. </p>
    <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="close-watcher">close watcher</dfn> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct">struct</a> with the following <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item">items</a>:</p>
    <ul>
     <li data-md>
@@ -779,7 +782,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>If <var>document</var> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#fully-active" id="ref-for-fully-active①">fully active</a>, then return false.</p>
      <li data-md>
-      <p>If <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global①">relevant global object</a> has <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation">transient activation</a>, then return true.</p>
+      <p>If <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global①">relevant global object</a> has <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation①">transient activation</a>, then return true.</p>
      <li data-md>
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate">For each</a> <var>closeWatcher</var> in <var>document</var>’s <a data-link-type="dfn" href="#close-watcher-stack" id="ref-for-close-watcher-stack③">close watcher stack</a>:</p>
       <ol>
@@ -798,24 +801,25 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-undefined" id="ref-for-idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-destroy" id="ref-for-dom-closewatcher-destroy"><c- g>destroy</c-></a>();
   <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-undefined" id="ref-for-idl-undefined①"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-signalclose" id="ref-for-dom-closewatcher-signalclose"><c- g>signalClose</c-></a>();
 
-  <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-onclose" id="ref-for-dom-closewatcher-onclose"><c- g>onclose</c-></a>;
+  <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-oncancel" id="ref-for-dom-closewatcher-oncancel"><c- g>oncancel</c-></a>;
+  <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler①"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-onclose" id="ref-for-dom-closewatcher-onclose"><c- g>onclose</c-></a>;
 };
 </pre>
    <dl class="domintro non-normative">
     <dt><code><var>watcher</var> = new <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-closewatcher" id="ref-for-dom-closewatcher-closewatcher①">CloseWatcher</a></code>()</code>
     <dd>
-     <p>Attempts to create a new <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher">CloseWatcher</a></code> instance. </p>
-     <p>If a <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher①">CloseWatcher</a></code> is already active, then this will instead throw a "<code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#notallowederror" id="ref-for-notallowederror">NotAllowedError</a></code>" <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#idl-DOMException" id="ref-for-idl-DOMException">DOMException</a></code>. </p>
+     <p>Attempts to create a new <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher①">CloseWatcher</a></code> instance. </p>
+     <p>If a <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher②">CloseWatcher</a></code> is already active, and the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window①">Window</a></code> does not have <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation②">transient user activation</a>, then this will instead throw a "<code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#notallowederror" id="ref-for-notallowederror">NotAllowedError</a></code>" <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#idl-DOMException" id="ref-for-idl-DOMException">DOMException</a></code>. </p>
     <dt><code><var>watcher</var>.<code class="idl"><a data-link-type="idl" href="#dom-closewatcher-destroy" id="ref-for-dom-closewatcher-destroy①">destroy</a></code>()</code>
     <dd>
-     <p>Deactivates this <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher②">CloseWatcher</a></code> instance, so that it will no longer receive <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close">close</a></code> events and so that new <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher③">CloseWatcher</a></code> instances can be constructed. </p>
+     <p>Deactivates this <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher③">CloseWatcher</a></code> instance, so that it will no longer receive <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close">close</a></code> events and so that new <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher④">CloseWatcher</a></code> instances can be constructed. </p>
      <p>This is intended to be called if the relevant UI element is closed in some other way than via a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal">close signal</a>, e.g. by pressing an explicit "Close" button. </p>
     <dt><code><var>watcher</var>.<code class="idl"><a data-link-type="idl" href="#dom-closewatcher-signalclose" id="ref-for-dom-closewatcher-signalclose①">signalClose</a></code>()</code>
     <dd>
-     <p>Acts as if a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal①">close signal</a> was sent targeting this <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher④">CloseWatcher</a></code> instance, by firing a <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close①">close</a></code> event and deactivating the close watcher as if <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-destroy" id="ref-for-dom-closewatcher-destroy②">destroy()</a></code> was called. </p>
+     <p>Acts as if a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal①">close signal</a> was sent targeting this <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑤">CloseWatcher</a></code> instance, by firing a <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close①">close</a></code> event and deactivating the close watcher as if <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-destroy" id="ref-for-dom-closewatcher-destroy②">destroy()</a></code> was called. </p>
      <p>This is a helper utility that can be used to consolidate closing logic into the <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close②">close</a></code> event handler, by having all non-<a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal②">close signal</a> closing affordances call <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-signalclose" id="ref-for-dom-closewatcher-signalclose②">signalClose()</a></code>. </p>
    </dl>
-   <p>Each <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑤">CloseWatcher</a></code> has an <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-is-active">is active</dfn>, which is a boolean.</p>
+   <p>Each <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑥">CloseWatcher</a></code> has an <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-is-active">is active</dfn>, which is a boolean.</p>
    <div class="algorithm" data-algorithm="CloseWatcher()" data-algorithm-for="CloseWatcher">
      The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="constructor" data-export data-lt="CloseWatcher()|constructor()" id="dom-closewatcher-closewatcher"><code>new CloseWatcher()</code></dfn> constructor steps are: 
     <ol>
@@ -833,18 +837,32 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
        <li data-md>
         <p><a data-link-type="dfn" href="#close-watcher-blocks-further-developer-controlled-close-watchers" id="ref-for-close-watcher-blocks-further-developer-controlled-close-watchers①">blocks further developer-controlled close watchers</a> being true</p>
       </ul>
+     <li data-md>
+      <p>Set <a data-link-type="dfn" href="https://heycam.github.io/webidl/#this" id="ref-for-this⑤">this</a>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global④">relevant global object</a>'s <a data-link-type="dfn" href="#timestamp-of-last-activation-used-for-close-watchers" id="ref-for-timestamp-of-last-activation-used-for-close-watchers">timestamp of last activation used for close watchers</a> to <a data-link-type="dfn" href="https://heycam.github.io/webidl/#this" id="ref-for-this⑥">this</a>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global⑤">relevant global object</a>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp" id="ref-for-last-activation-timestamp①">last activation timestamp</a>.</p>
     </ol>
    </div>
-   <div class="algorithm" data-algorithm="destroy()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-destroy"><code>destroy()</code></dfn> method steps are to set <a data-link-type="dfn" href="https://heycam.github.io/webidl/#this" id="ref-for-this⑤">this</a>'s <a data-link-type="dfn" href="#closewatcher-is-active" id="ref-for-closewatcher-is-active②">is active</a> to false. </div>
-   <div class="algorithm" data-algorithm="signalClose()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-signalclose"><code>signalClose()</code></dfn> method steps are to <a data-link-type="dfn" href="#closewatcher-signal-close" id="ref-for-closewatcher-signal-close①">signal close</a> on <a data-link-type="dfn" href="https://heycam.github.io/webidl/#this" id="ref-for-this⑥">this</a>. </div>
-   <p>Objects implementing the <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑥">CloseWatcher</a></code> interface must support the <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="attribute" data-export id="dom-closewatcher-onclose"><code>onclose</code></dfn> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes" id="ref-for-event-handler-idl-attributes">event handler IDL attribute</a>, whose <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-event-type" id="ref-for-event-handler-event-type">event handler event type</a> is <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="event" data-export id="eventdef-closewatcher-close"><code>close</code></dfn>.</p>
+   <p class="algorithm" data-algorithm="destroy()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-destroy"><code>destroy()</code></dfn> method steps are to set <a data-link-type="dfn" href="https://heycam.github.io/webidl/#this" id="ref-for-this⑦">this</a>'s <a data-link-type="dfn" href="#closewatcher-is-active" id="ref-for-closewatcher-is-active②">is active</a> to false. </p>
+   <p class="algorithm" data-algorithm="signalClose()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-signalclose"><code>signalClose()</code></dfn> method steps are to <a data-link-type="dfn" href="#closewatcher-signal-close" id="ref-for-closewatcher-signal-close①">signal close</a> on <a data-link-type="dfn" href="https://heycam.github.io/webidl/#this" id="ref-for-this⑧">this</a>. </p>
+   <p>Objects implementing the <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑦">CloseWatcher</a></code> interface must support the <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="attribute" data-export id="dom-closewatcher-oncancel"><code>oncancel</code></dfn> and <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="attribute" data-export id="dom-closewatcher-onclose"><code>onclose</code></dfn> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes" id="ref-for-event-handler-idl-attributes">event handler IDL attribute</a>, whose <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-event-type" id="ref-for-event-handler-event-type">event handler event types</a> are respectively <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="event" data-export id="eventdef-closewatcher-cancel"><code>cancel</code></dfn> and <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="event" data-export id="eventdef-closewatcher-close"><code>close</code></dfn>.</p>
    <div class="algorithm" data-algorithm="signal close" data-algorithm-for="CloseWatcher">
-     To <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-signal-close">signal close</dfn> on a <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑦">CloseWatcher</a></code> <var>closeWatcher</var>: 
+     To <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-signal-close">signal close</dfn> on a <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑧">CloseWatcher</a></code> <var>closeWatcher</var>: 
     <ol>
      <li data-md>
       <p>If <var>closeWatcher</var>’s <a data-link-type="dfn" href="#closewatcher-is-active" id="ref-for-closewatcher-is-active③">is active</a> is false, then return.</p>
      <li data-md>
-      <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire">Fire an event</a> named <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close③">close</a></code> at <var>closeWatcher</var>.</p>
+      <p>Let <var>window</var> be <var>closeWatcher</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global⑥">relevant global object</a>.</p>
+     <li data-md>
+      <p>If <var>window</var>’s <a data-link-type="dfn" href="#timestamp-of-last-activation-used-for-close-watchers" id="ref-for-timestamp-of-last-activation-used-for-close-watchers①">timestamp of last activation used for close watchers</a> does not equal <var>window</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp" id="ref-for-last-activation-timestamp②">last activation timestamp</a>, then:</p>
+      <ol>
+       <li data-md>
+        <p>Let <var>shouldContinue</var> be the result of <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire">firing an event</a> named <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-cancel" id="ref-for-eventdef-closewatcher-cancel①">cancel</a></code> at <var>closeWatcher</var>, with the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-cancelable" id="ref-for-dom-event-cancelable">cancelable</a></code> attribute initialized to true.</p>
+       <li data-md>
+        <p>Set <var>window</var>’s <a data-link-type="dfn" href="#timestamp-of-last-activation-used-for-close-watchers" id="ref-for-timestamp-of-last-activation-used-for-close-watchers②">timestamp of last activation used for close watchers</a> to <var>window</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp" id="ref-for-last-activation-timestamp③">last activation timestamp</a>.</p>
+       <li data-md>
+        <p>If <var>shouldContinue</var> is false, then return.</p>
+      </ol>
+     <li data-md>
+      <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">Fire an event</a> named <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close③">close</a></code> at <var>closeWatcher</var>.</p>
      <li data-md>
       <p>Set <var>closeWatcher</var>’s <a data-link-type="dfn" href="#closewatcher-is-active" id="ref-for-closewatcher-is-active④">is active</a> to false.</p>
     </ol>
@@ -853,7 +871,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <h3 class="heading settled" data-level="2.1" id="patch-fullscreen"><span class="secno">2.1. </span><span class="content">Fullscreen</span><a class="self-link" href="#patch-fullscreen"></a></h3>
    <p>Replace the sentence about "If the end user instructs..." in <a href="https://fullscreen.spec.whatwg.org/#ui"><cite>Fullscreen API</cite> § 4 UI</a> with the following:</p>
    <p>If the user initiates a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal③">close signal</a>, this will trigger the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#fully-exit-fullscreen" id="ref-for-fully-exit-fullscreen①">fully exit fullscreen</a> algorithm as part of the <a data-link-type="dfn" href="#close-signal-steps" id="ref-for-close-signal-steps">close signal steps</a>. This takes precedence over any <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher④">close watchers</a>.</p>
-   <h3 class="heading settled" data-level="2.2" id="patch-dialog"><span class="secno">2.2. </span><span class="content">The <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="ref-for-the-dialog-element">dialog</a></code> element</span><a class="self-link" href="#patch-dialog"></a></h3>
+   <h3 class="heading settled" data-level="2.2" id="patch-dialog"><span class="secno">2.2. </span><span class="content">The <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="ref-for-the-dialog-element①">dialog</a></code> element</span><a class="self-link" href="#patch-dialog"></a></h3>
    <p>Update <cite>HTML</cite>’s <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="termref-for-the-dialog-element">The <code>dialog</code> element</a> section as follows: <a data-link-type="biblio" href="#biblio-html">[HTML]</a></p>
    <div class="algorithm" data-algorithm="showModal patch">
      In the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal" id="ref-for-dom-dialog-showmodal">showModal()</a></code> steps, after adding <var>subject</var> to the <a data-link-type="dfn" href="https://fullscreen.spec.whatwg.org/#top-layer" id="ref-for-top-layer">top layer</a>, append the following step: 
@@ -868,6 +886,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
        <li data-md>
         <p><a data-link-type="dfn" href="#close-watcher-blocks-further-developer-controlled-close-watchers" id="ref-for-close-watcher-blocks-further-developer-controlled-close-watchers②">blocks further developer-controlled close watchers</a> being true</p>
       </ul>
+      <p class="note" role="note">If we <a data-link-type="dfn" href="#can-create-a-developer-controlled-close-watcher" id="ref-for-can-create-a-developer-controlled-close-watcher②">cannot create a developer-controlled close watcher</a>, then this modal dialog will not respond to <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal④">close signals</a>. The <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal" id="ref-for-dom-dialog-showmodal①">showModal()</a></code> method proceeds without any exception or other indication of this, although the browser could <a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console">report a warning to the console</a>. </p>
     </ol>
    </div>
    <p>Replace the "Canceling dialogs" section entirely with the following definition. (The previous prose about providing a user interface to cancel such dialogs, and the task-queuing, is now handled by the infrastructure in <a href="#close-signals">§ 1 Close signals</a>.)</p>
@@ -875,9 +894,20 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="cancel-the-dialog">cancel the dialog</dfn> <var>dialog</var>: 
     <ol>
      <li data-md>
-      <p>Let <var>close</var> be the result of <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">firing an event</a> named <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel" id="ref-for-event-cancel">cancel</a></code> at <var>dialog</var>, with the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-cancelable" id="ref-for-dom-event-cancelable">cancelable</a></code> attribute initialized to true.</p>
+      <p>Let <var>window</var> be <var>dialog</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global⑦">relevant global object</a>.</p>
      <li data-md>
-      <p>If <var>close</var> is true and <var>dialog</var> has an <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-open" id="ref-for-attr-dialog-open">open</a></code> content attribute, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#close-the-dialog" id="ref-for-close-the-dialog">close the dialog</a> <var>dialog</var> with no return value.</p>
+      <p>If <var>window</var>’s <a data-link-type="dfn" href="#timestamp-of-last-activation-used-for-close-watchers" id="ref-for-timestamp-of-last-activation-used-for-close-watchers③">timestamp of last activation used for close watchers</a> does not equal <var>window</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp" id="ref-for-last-activation-timestamp④">last activation timestamp</a>, then:</p>
+      <ol>
+       <li data-md>
+        <p>Let <var>shouldContinue</var> to the result of <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire②">firing an event</a> named <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel" id="ref-for-event-cancel①">cancel</a></code> at <var>dialog</var>, with the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-cancelable" id="ref-for-dom-event-cancelable①">cancelable</a></code> attribute initialized to true.</p>
+       <li data-md>
+        <p>Set <var>window</var>’s <a data-link-type="dfn" href="#timestamp-of-last-activation-used-for-close-watchers" id="ref-for-timestamp-of-last-activation-used-for-close-watchers④">timestamp of last activation used for close watchers</a> to <var>window</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp" id="ref-for-last-activation-timestamp⑤">last activation timestamp</a>.</p>
+       <li data-md>
+        <p>If <var>shouldContinue</var> is false, then return.</p>
+      </ol>
+     <li data-md>
+      <p>If <var>dialog</var> has an <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-open" id="ref-for-attr-dialog-open">open</a></code> content attribute, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#close-the-dialog" id="ref-for-close-the-dialog">close the dialog</a> <var>dialog</var> with no return value.</p>
+      <p class="note" role="note">We need to check for the attribute since any <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel" id="ref-for-event-cancel②">cancel</a></code> event handlers might have removed it. </p>
     </ol>
    </div>
   </main>
@@ -886,6 +916,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
    <li><a href="#close-watcher-blocks-further-developer-controlled-close-watchers">blocks further developer-controlled close watchers</a><span>, in § 1.1</span>
+   <li><a href="#eventdef-closewatcher-cancel">cancel</a><span>, in § 1.2</span>
    <li><a href="#cancel-the-dialog">cancel the dialog</a><span>, in § 2.2</span>
    <li><a href="#can-create-a-developer-controlled-close-watcher">can create a developer-controlled close watcher</a><span>, in § 1.1</span>
    <li><a href="#can-create-a-developer-controlled-close-watcher">cannot create a developer-controlled close watcher</a><span>, in § 1.1</span>
@@ -901,6 +932,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <li><a href="#dom-closewatcher-destroy">destroy()</a><span>, in § 1.2</span>
    <li><a href="#closewatcher-is-active">is active</a><span>, in § 1.2</span>
    <li><a href="#close-watcher-is-still-valid">is still valid</a><span>, in § 1.1</span>
+   <li><a href="#dom-closewatcher-oncancel">oncancel</a><span>, in § 1.2</span>
    <li><a href="#dom-closewatcher-onclose">onclose</a><span>, in § 1.2</span>
    <li>
     signal close
@@ -909,7 +941,14 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><a href="#closewatcher-signal-close">dfn for CloseWatcher</a><span>, in § 1.2</span>
     </ul>
    <li><a href="#dom-closewatcher-signalclose">signalClose()</a><span>, in § 1.2</span>
+   <li><a href="#timestamp-of-last-activation-used-for-close-watchers">timestamp of last activation used for close watchers</a><span>, in § 1.1</span>
   </ul>
+  <aside class="dfn-panel" data-for="term-for-report-a-warning-to-the-console">
+   <a href="https://console.spec.whatwg.org/#report-a-warning-to-the-console">https://console.spec.whatwg.org/#report-a-warning-to-the-console</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-report-a-warning-to-the-console">2.2. The dialog element</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-document">
    <a href="https://dom.spec.whatwg.org/#document">https://dom.spec.whatwg.org/#document</a><b>Referenced in:</b>
    <ul>
@@ -926,7 +965,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-dom-event-cancelable">
    <a href="https://dom.spec.whatwg.org/#dom-event-cancelable">https://dom.spec.whatwg.org/#dom-event-cancelable</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-event-cancelable">2.2. The dialog element</a>
+    <li><a href="#ref-for-dom-event-cancelable">1.2. Close watcher API</a>
+    <li><a href="#ref-for-dom-event-cancelable①">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-canceled-flag">
@@ -938,8 +978,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-concept-event-fire">
    <a href="https://dom.spec.whatwg.org/#concept-event-fire">https://dom.spec.whatwg.org/#concept-event-fire</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-event-fire">1.2. Close watcher API</a>
-    <li><a href="#ref-for-concept-event-fire①">2.2. The dialog element</a>
+    <li><a href="#ref-for-concept-event-fire">1.2. Close watcher API</a> <a href="#ref-for-concept-event-fire①">(2)</a>
+    <li><a href="#ref-for-concept-event-fire②">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-node-document">
@@ -979,10 +1019,23 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-top-layer">2.2. The dialog element</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-dom-domhighrestimestamp">
+   <a href="https://www.w3.org/TR/hr-time-2/#dom-domhighrestimestamp">https://www.w3.org/TR/hr-time-2/#dom-domhighrestimestamp</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-domhighrestimestamp">1.1. Close watcher infrastructure</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-eventhandler">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler">https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-eventhandler">1.2. Close watcher API</a>
+    <li><a href="#ref-for-eventhandler">1.2. Close watcher API</a> <a href="#ref-for-eventhandler①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-window">
+   <a href="https://html.spec.whatwg.org/multipage/window-object.html#window">https://html.spec.whatwg.org/multipage/window-object.html#window</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-window">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-window①">1.2. Close watcher API</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-document-window">
@@ -1000,7 +1053,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-event-cancel">
    <a href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel">https://html.spec.whatwg.org/multipage/indices.html#event-cancel</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-event-cancel">2.2. The dialog element</a>
+    <li><a href="#ref-for-event-cancel">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-event-cancel①">2.2. The dialog element</a> <a href="#ref-for-event-cancel②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-close-the-dialog">
@@ -1012,7 +1066,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-the-dialog-element">
    <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element">https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-the-dialog-element">2.2. The dialog element</a> <a href="#termref-for-the-dialog-element">(2)</a>
+    <li><a href="#ref-for-the-dialog-element">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-the-dialog-element①">2.2. The dialog element</a> <a href="#termref-for-the-dialog-element">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-event-handler-event-type">
@@ -1032,6 +1087,14 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-fully-active">1. Close signals</a>
     <li><a href="#ref-for-fully-active①">1.1. Close watcher infrastructure</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-last-activation-timestamp">
+   <a href="https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp">https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-last-activation-timestamp">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-last-activation-timestamp①">1.2. Close watcher API</a> <a href="#ref-for-last-activation-timestamp②">(2)</a> <a href="#ref-for-last-activation-timestamp③">(3)</a>
+    <li><a href="#ref-for-last-activation-timestamp④">2.2. The dialog element</a> <a href="#ref-for-last-activation-timestamp⑤">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-attr-dialog-open">
@@ -1057,19 +1120,21 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-concept-relevant-global">1. Close signals</a>
     <li><a href="#ref-for-concept-relevant-global①">1.1. Close watcher infrastructure</a>
-    <li><a href="#ref-for-concept-relevant-global②">1.2. Close watcher API</a> <a href="#ref-for-concept-relevant-global③">(2)</a>
+    <li><a href="#ref-for-concept-relevant-global②">1.2. Close watcher API</a> <a href="#ref-for-concept-relevant-global③">(2)</a> <a href="#ref-for-concept-relevant-global④">(3)</a> <a href="#ref-for-concept-relevant-global⑤">(4)</a> <a href="#ref-for-concept-relevant-global⑥">(5)</a>
+    <li><a href="#ref-for-concept-relevant-global⑦">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-dialog-showmodal">
    <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal">https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-dialog-showmodal">2.2. The dialog element</a>
+    <li><a href="#ref-for-dom-dialog-showmodal">2.2. The dialog element</a> <a href="#ref-for-dom-dialog-showmodal①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-transient-activation">
    <a href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation">https://html.spec.whatwg.org/multipage/interaction.html#transient-activation</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-transient-activation">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-transient-activation">1.1. Close watcher infrastructure</a> <a href="#ref-for-transient-activation①">(2)</a>
+    <li><a href="#ref-for-transient-activation②">1.2. Close watcher API</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-traverse-the-history-by-a-delta">
@@ -1157,7 +1222,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-this">
    <a href="https://heycam.github.io/webidl/#this">https://heycam.github.io/webidl/#this</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-this">1.2. Close watcher API</a> <a href="#ref-for-this①">(2)</a> <a href="#ref-for-this②">(3)</a> <a href="#ref-for-this③">(4)</a> <a href="#ref-for-this④">(5)</a> <a href="#ref-for-this⑤">(6)</a> <a href="#ref-for-this⑥">(7)</a>
+    <li><a href="#ref-for-this">1.2. Close watcher API</a> <a href="#ref-for-this①">(2)</a> <a href="#ref-for-this②">(3)</a> <a href="#ref-for-this③">(4)</a> <a href="#ref-for-this④">(5)</a> <a href="#ref-for-this⑤">(6)</a> <a href="#ref-for-this⑥">(7)</a> <a href="#ref-for-this⑦">(8)</a> <a href="#ref-for-this⑧">(9)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-idl-undefined">
@@ -1168,6 +1233,11 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
+   <li>
+    <a data-link-type="biblio">[CONSOLE]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="term-for-report-a-warning-to-the-console">report a warning to the console</span>
+    </ul>
    <li>
     <a data-link-type="biblio">[DOM]</a> defines the following terms:
     <ul>
@@ -1188,9 +1258,15 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-top-layer">top layer</span>
     </ul>
    <li>
+    <a data-link-type="biblio">[hr-time-2]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="term-for-dom-domhighrestimestamp">DOMHighResTimeStamp</span>
+    </ul>
+   <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="term-for-eventhandler">EventHandler</span>
+     <li><span class="dfn-paneled" id="term-for-window">Window</span>
      <li><span class="dfn-paneled" id="term-for-concept-document-window">associated document</span>
      <li><span class="dfn-paneled" id="term-for-blocked-by-a-modal-dialog">blocked by a modal dialog</span>
      <li><span class="dfn-paneled" id="term-for-event-cancel">cancel</span>
@@ -1199,6 +1275,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-event-handler-event-type">event handler event type</span>
      <li><span class="dfn-paneled" id="term-for-event-handler-idl-attributes">event handler idl attribute</span>
      <li><span class="dfn-paneled" id="term-for-fully-active">fully active</span>
+     <li><span class="dfn-paneled" id="term-for-last-activation-timestamp">last activation timestamp</span>
      <li><span class="dfn-paneled" id="term-for-attr-dialog-open">open</span>
      <li><span class="dfn-paneled" id="term-for-queue-a-global-task">queue a global task</span>
      <li><span class="dfn-paneled" id="term-for-queue-a-task">queue a task</span>
@@ -1241,14 +1318,21 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-fullscreen">[FULLSCREEN]
    <dd>Philip Jägenstedt. <a href="https://fullscreen.spec.whatwg.org/"><cite>Fullscreen API Standard</cite></a>. Living Standard. URL: <a href="https://fullscreen.spec.whatwg.org/">https://fullscreen.spec.whatwg.org/</a>
+   <dt id="biblio-hr-time-2">[HR-TIME-2]
+   <dd>Ilya Grigorik. <a href="https://w3c.github.io/hr-time/"><cite>High Resolution Time Level 2</cite></a>. URL: <a href="https://w3c.github.io/hr-time/">https://w3c.github.io/hr-time/</a>
    <dt id="biblio-html">[HTML]
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-infra">[INFRA]
    <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/"><cite>Infra Standard</cite></a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
    <dt id="biblio-ui-events">[UI-EVENTS]
-   <dd>Gary Kacmarcik; Travis Leithead; Doug Schepers. <a href="https://w3c.github.io/uievents/"><cite>UI Events</cite></a>. URL: <a href="https://w3c.github.io/uievents/">https://w3c.github.io/uievents/</a>
+   <dd>Gary Kacmarcik; Travis Leithead. <a href="https://w3c.github.io/uievents/"><cite>UI Events</cite></a>. URL: <a href="https://w3c.github.io/uievents/">https://w3c.github.io/uievents/</a>
    <dt id="biblio-webidl">[WebIDL]
    <dd>Boris Zbarsky. <a href="https://heycam.github.io/webidl/"><cite>Web IDL</cite></a>. URL: <a href="https://heycam.github.io/webidl/">https://heycam.github.io/webidl/</a>
+  </dl>
+  <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
+  <dl>
+   <dt id="biblio-console">[CONSOLE]
+   <dd>Dominic Farolino; Robert Kowalski; Terin Stock. <a href="https://console.spec.whatwg.org/"><cite>Console Standard</cite></a>. Living Standard. URL: <a href="https://console.spec.whatwg.org/">https://console.spec.whatwg.org/</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL Index</span><a class="self-link" href="#idl-index"></a></h2>
 <pre class="idl highlight def">[<a class="idl-code" data-link-type="extended-attribute" href="https://heycam.github.io/webidl/#Exposed"><c- g>Exposed</c-></a>=<c- n>Window</c->]
@@ -1258,6 +1342,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-destroy"><c- g>destroy</c-></a>();
   <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-signalclose"><c- g>signalClose</c-></a>();
 
+  <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-oncancel"><c- g>oncancel</c-></a>;
   <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-onclose"><c- g>onclose</c-></a>;
 };
 
@@ -1267,6 +1352,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-close-signal">1.2. Close watcher API</a> <a href="#ref-for-close-signal①">(2)</a> <a href="#ref-for-close-signal②">(3)</a>
     <li><a href="#ref-for-close-signal③">2.1. Fullscreen</a>
+    <li><a href="#ref-for-close-signal④">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-signal-steps">
@@ -1281,6 +1367,13 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-close-watcher-stack">1.1. Close watcher infrastructure</a> <a href="#ref-for-close-watcher-stack①">(2)</a> <a href="#ref-for-close-watcher-stack②">(3)</a> <a href="#ref-for-close-watcher-stack③">(4)</a>
     <li><a href="#ref-for-close-watcher-stack④">1.2. Close watcher API</a>
     <li><a href="#ref-for-close-watcher-stack⑤">2.2. The dialog element</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="timestamp-of-last-activation-used-for-close-watchers">
+   <b><a href="#timestamp-of-last-activation-used-for-close-watchers">#timestamp-of-last-activation-used-for-close-watchers</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-timestamp-of-last-activation-used-for-close-watchers">1.2. Close watcher API</a> <a href="#ref-for-timestamp-of-last-activation-used-for-close-watchers①">(2)</a> <a href="#ref-for-timestamp-of-last-activation-used-for-close-watchers②">(3)</a>
+    <li><a href="#ref-for-timestamp-of-last-activation-used-for-close-watchers③">2.2. The dialog element</a> <a href="#ref-for-timestamp-of-last-activation-used-for-close-watchers④">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher">
@@ -1328,13 +1421,14 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <b><a href="#can-create-a-developer-controlled-close-watcher">#can-create-a-developer-controlled-close-watcher</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-can-create-a-developer-controlled-close-watcher">1.2. Close watcher API</a>
-    <li><a href="#ref-for-can-create-a-developer-controlled-close-watcher①">2.2. The dialog element</a>
+    <li><a href="#ref-for-can-create-a-developer-controlled-close-watcher①">2.2. The dialog element</a> <a href="#ref-for-can-create-a-developer-controlled-close-watcher②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="closewatcher">
    <b><a href="#closewatcher">#closewatcher</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-closewatcher">1.2. Close watcher API</a> <a href="#ref-for-closewatcher①">(2)</a> <a href="#ref-for-closewatcher②">(3)</a> <a href="#ref-for-closewatcher③">(4)</a> <a href="#ref-for-closewatcher④">(5)</a> <a href="#ref-for-closewatcher⑤">(6)</a> <a href="#ref-for-closewatcher⑥">(7)</a> <a href="#ref-for-closewatcher⑦">(8)</a>
+    <li><a href="#ref-for-closewatcher">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-closewatcher①">1.2. Close watcher API</a> <a href="#ref-for-closewatcher②">(2)</a> <a href="#ref-for-closewatcher③">(3)</a> <a href="#ref-for-closewatcher④">(4)</a> <a href="#ref-for-closewatcher⑤">(5)</a> <a href="#ref-for-closewatcher⑥">(6)</a> <a href="#ref-for-closewatcher⑦">(7)</a> <a href="#ref-for-closewatcher⑧">(8)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="closewatcher-is-active">
@@ -1361,10 +1455,23 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-dom-closewatcher-signalclose">1.2. Close watcher API</a> <a href="#ref-for-dom-closewatcher-signalclose①">(2)</a> <a href="#ref-for-dom-closewatcher-signalclose②">(3)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="dom-closewatcher-oncancel">
+   <b><a href="#dom-closewatcher-oncancel">#dom-closewatcher-oncancel</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-closewatcher-oncancel">1.2. Close watcher API</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="dom-closewatcher-onclose">
    <b><a href="#dom-closewatcher-onclose">#dom-closewatcher-onclose</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-dom-closewatcher-onclose">1.2. Close watcher API</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="eventdef-closewatcher-cancel">
+   <b><a href="#eventdef-closewatcher-cancel">#eventdef-closewatcher-cancel</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-eventdef-closewatcher-cancel">1.1. Close watcher infrastructure</a>
+    <li><a href="#ref-for-eventdef-closewatcher-cancel①">1.2. Close watcher API</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="eventdef-closewatcher-close">
