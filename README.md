@@ -143,7 +143,7 @@ _Note: the name of this event, i.e. `cancel` instead of something like `beforecl
 
 For abuse prevention purposes, this event only fires if the page has received user activation. Furthermore, once it fires for one `CloseWatcher` instance, it will not fire again for any `CloseWatcher` instances until the page again gets user activation. This ensures that if the user sends a close signal twice in a row without any intervening user activation, the signal definitely goes through, destroying the `CloseWatcher`.
 
-_Currently the <kbd>Esc</kbd> key itself counts as user activation, so on desktop platforms where that is the close signal, this clause has no effect. That is, there is always a recent user activation and so `cancel` will always be fired. See discussion in [#7](https://github.com/WICG/close-watcher/issues/7) about whether this is a good or bad thing._
+_Currently on some platforms the <kbd>Esc</kbd> key itself counts as user activation, so on platforms where that is also the close signal, this clause has no effect. That is, there is always a recent user activation and so `cancel` will always be fired. See discussion in [#7](https://github.com/WICG/close-watcher/issues/7). Note that at least Chromium ensures <kbd>Esc</kbd> is not a user activation, so one path forward is standardizing that behavior._
 
 Note that the `cancel` event is not fired when the user navigates away from the page: i.e., it has no overlap with `beforeunload`. `beforeunload` remains the best way to confirm a page unload, with `cancel` only used for confirming a close signal.
 
