@@ -282,3 +282,21 @@ Replace the "Canceling dialogs" section entirely with the following definition. 
 
      <p class="note">We need to check for the attribute since any {{HTMLElement/cancel}} event handlers might have removed it.
 </div>
+
+<h2 id="security-and-privacy">Security and privacy considerations</h2>
+
+<h3 id="security">Security considerations</h3>
+
+The main security consideration with this API is preventing abusive pages from hijacking the fallback behavior in the last part of the [=close signal steps=]. A concrete example is on Android, where the [=close signal=] is the software back button, and this fallback behavior is to <a spec="HTML">traverse the history by a delta</a> of &minus;1. If developers could always intercept Android back button presses via {{CloseWatcher}} instances and <{dialog}> elements, then they could effectively break the back button by never letting it pass through to the fallback behavior.
+
+Much of the complexity of this specification is designed around preventing such abuse. Without it, the API could consist of a single event. But with this constraint, we need an API surface such as the {{CloseWatcher/CloseWatcher()}} constructor which can be gated by additional checks, as well as the [=close watcher stack=] to ensure that each [=close watcher=] can only consume a single [=close signal=].
+
+Concretely, the mechanism of [=checking if we can create a developer-controlled close watcher=] ensures that web developers can only create {{CloseWatcher}} instances, or call {{Event/preventDefault()}} on {{CloseWatcher/cancel}} events, by [=transient activation-consuming API|consuming user activation=]. This gives similar protections to what browsers have in place today, where back button UI skips entries that were added without user activation.
+
+We do allow one "free" {{CloseWatcher}} to be created, without consuming user activation, to handle cases like session inactivity timeout dialogs, or urgent notifications of server-triggered events. The end result is that this specification expands the number of Android back button presses that a maximally-abusive page could require to escape from <var>number of user activations</var> + 1 to <var>number of user activations</var> + 2. (See <a href="https://github.com/WICG/close-watcher#abuse-analysis">the explainer</a> for a full analysis.) We believe this tradeoff is worthwhile.
+
+<h3 id="privacy">Privacy considerations</h3>
+
+We believe the privacy impact of this API is minimal. The only information it gives about the user to the web developer is that a close signal has occurred, which is a very infrequent and coarse piece of user input.
+
+In all cases we're aware of today, such close signals are already detectable by web developers (e.g., by using {{keydown!!event}} listeners on desktop or {{Window/popstate}} listeners on Android). In theory, by correlating these existing events with the {{CloseWatcher}}'s {{CloseWatcher/close}} event, a web developer could determine some information about the platform. (I.e., if they correlate with {{keydown!!event}} events, the user is likely on desktop, or at least on a keyboard-attached mobile device.) This is similar to existing techniques which detect whether touch events or mouse events are fired, and user agents which want to emulate a different platform in order to mask the user's choice might want to apply similar mitigation techniques for close watchers as they do for other platform-revealing events.

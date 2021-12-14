@@ -343,11 +343,7 @@ Our current thinking is that we should produce both paths: we should work on bun
 
 ## Security and privacy considerations
 
-This feature has no security considerations to speak of, as a purely DOM API.
-
-Regarding privacy, this proposal does not expose any information that was not already available via other means, such as `keydown` listeners.
-
-See the [W3C TAG Security and Privacy Questionnaire answers](./security-privacy-questionnaire.md) for more.
+See [the specification's summary](https://wicg.github.io/close-watcher/#security-and-privacy) and the [W3C TAG Security and Privacy Questionnaire answers](./security-privacy-questionnaire.md) for more.
 
 ## Stakeholder feedback
 

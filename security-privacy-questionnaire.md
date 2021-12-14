@@ -60,7 +60,7 @@ No differently.
 
 **Does this specification have both "Security Considerations" and "Privacy Considerations" sections?**
 
-Not yet.
+[Yes](https://wicg.github.io/close-watcher/#security-and-privacy).
 
 **Do features in your specification enable downgrading default security characteristics?**
 
