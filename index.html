@@ -4,7 +4,7 @@
   <title>Close Watcher API</title>
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version bbc364800, updated Mon Nov 15 13:57:55 2021 -0800" name="generator">
+  <meta content="Bikeshed version cace53f8c, updated Tue Dec 7 12:12:54 2021 -0800" name="generator">
   <link href="https://wicg.github.io/close-watcher/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -649,7 +649,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Close Watcher API</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2021-11-24">24 November 2021</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2021-12-14">14 December 2021</time></p>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt class="editor">Editor:
@@ -695,6 +695,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <ol class="toc">
       <li><a href="#patch-fullscreen"><span class="secno">2.1</span> <span class="content">Fullscreen</span></a>
       <li><a href="#patch-dialog"><span class="secno">2.2</span> <span class="content">The <code><span>dialog</span></code> element</span></a>
+     </ol>
+    <li>
+     <a href="#security-and-privacy"><span class="secno">3</span> <span class="content">Security and privacy considerations</span></a>
+     <ol class="toc">
+      <li><a href="#security"><span class="secno">3.1</span> <span class="content">Security considerations</span></a>
+      <li><a href="#privacy"><span class="secno">3.2</span> <span class="content">Privacy considerations</span></a>
      </ol>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -944,6 +950,15 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <p class="note" role="note">We need to check for the attribute since any <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel" id="ref-for-event-cancel②">cancel</a></code> event handlers might have removed it. </p>
     </ol>
    </div>
+   <h2 class="heading settled" data-level="3" id="security-and-privacy"><span class="secno">3. </span><span class="content">Security and privacy considerations</span><a class="self-link" href="#security-and-privacy"></a></h2>
+   <h3 class="heading settled" data-level="3.1" id="security"><span class="secno">3.1. </span><span class="content">Security considerations</span><a class="self-link" href="#security"></a></h3>
+   <p>The main security consideration with this API is preventing abusive pages from hijacking the fallback behavior in the last part of the <a data-link-type="dfn" href="#close-signal-steps" id="ref-for-close-signal-steps①">close signal steps</a>. A concrete example is on Android, where the <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal⑤">close signal</a> is the software back button, and this fallback behavior is to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/history.html#traverse-the-history-by-a-delta" id="ref-for-traverse-the-history-by-a-delta①">traverse the history by a delta</a> of −1. If developers could always intercept Android back button presses via <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑨">CloseWatcher</a></code> instances and <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" id="ref-for-the-dialog-element②">dialog</a></code> elements, then they could effectively break the back button by never letting it pass through to the fallback behavior.</p>
+   <p>Much of the complexity of this specification is designed around preventing such abuse. Without it, the API could consist of a single event. But with this constraint, we need an API surface such as the <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-closewatcher" id="ref-for-dom-closewatcher-closewatcher②">CloseWatcher()</a></code> constructor which can be gated by additional checks, as well as the <a data-link-type="dfn" href="#close-watcher-stack" id="ref-for-close-watcher-stack⑥">close watcher stack</a> to ensure that each <a data-link-type="dfn" href="#close-watcher" id="ref-for-close-watcher⑥">close watcher</a> can only consume a single <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal⑥">close signal</a>.</p>
+   <p>Concretely, the mechanism of <a data-link-type="dfn" href="#check-if-we-can-create-a-developer-controlled-close-watcher" id="ref-for-check-if-we-can-create-a-developer-controlled-close-watcher②">checking if we can create a developer-controlled close watcher</a> ensures that web developers can only create <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher①⓪">CloseWatcher</a></code> instances, or call <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-preventdefault" id="ref-for-dom-event-preventdefault①">preventDefault()</a></code> on <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-cancel" id="ref-for-eventdef-closewatcher-cancel②">cancel</a></code> events, by <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#activation-consuming-api" id="ref-for-activation-consuming-api">consuming user activation</a>. This gives similar protections to what browsers have in place today, where back button UI skips entries that were added without user activation.</p>
+   <p>We do allow one "free" <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher①①">CloseWatcher</a></code> to be created, without consuming user activation, to handle cases like session inactivity timeout dialogs, or urgent notifications of server-triggered events. The end result is that this specification expands the number of Android back button presses that a maximally-abusive page could require to escape from <var>number of user activations</var> + 1 to <var>number of user activations</var> + 2. (See <a href="https://github.com/WICG/close-watcher#abuse-analysis">the explainer</a> for a full analysis.) We believe this tradeoff is worthwhile.</p>
+   <h3 class="heading settled" data-level="3.2" id="privacy"><span class="secno">3.2. </span><span class="content">Privacy considerations</span><a class="self-link" href="#privacy"></a></h3>
+   <p>We believe the privacy impact of this API is minimal. The only information it gives about the user to the web developer is that a close signal has occurred, which is a very infrequent and coarse piece of user input.</p>
+   <p>In all cases we’re aware of today, such close signals are already detectable by web developers (e.g., by using <code class="idl"><a class="idl-code" data-link-type="event" href="https://w3c.github.io/uievents/#event-type-keydown" id="ref-for-event-type-keydown②">keydown</a></code> listeners on desktop or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-popstate" id="ref-for-event-popstate">popstate</a></code> listeners on Android). In theory, by correlating these existing events with the <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher①②">CloseWatcher</a></code>'s <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close④">close</a></code> event, a web developer could determine some information about the platform. (I.e., if they correlate with <code class="idl"><a class="idl-code" data-link-type="event" href="https://w3c.github.io/uievents/#event-type-keydown" id="ref-for-event-type-keydown③">keydown</a></code> events, the user is likely on desktop, or at least on a keyboard-attached mobile device.) This is similar to existing techniques which detect whether touch events or mouse events are fired, and user agents which want to emulate a different platform in order to mask the user’s choice might want to apply similar mitigation techniques for close watchers as they do for other platform-revealing events.</p>
   </main>
 <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
@@ -1026,6 +1041,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://dom.spec.whatwg.org/#dom-event-preventdefault">https://dom.spec.whatwg.org/#dom-event-preventdefault</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-dom-event-preventdefault">1. Close signals</a>
+    <li><a href="#ref-for-dom-event-preventdefault①">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-fullscreen-element">
@@ -1109,6 +1125,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-the-dialog-element">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-the-dialog-element①">2.2. The dialog element</a> <a href="#termref-for-the-dialog-element">(2)</a>
+    <li><a href="#ref-for-the-dialog-element②">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-event-handler-event-type">
@@ -1145,6 +1162,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-attr-dialog-open">2.2. The dialog element</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-event-popstate">
+   <a href="https://html.spec.whatwg.org/multipage/indices.html#event-popstate">https://html.spec.whatwg.org/multipage/indices.html#event-popstate</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-event-popstate">3.2. Privacy considerations</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-queue-a-global-task">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-global-task">https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-global-task</a><b>Referenced in:</b>
    <ul>
@@ -1178,10 +1201,17 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-transient-activation②">1.2. Close watcher API</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-activation-consuming-api">
+   <a href="https://html.spec.whatwg.org/multipage/interaction.html#activation-consuming-api">https://html.spec.whatwg.org/multipage/interaction.html#activation-consuming-api</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-activation-consuming-api">3.1. Security considerations</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-traverse-the-history-by-a-delta">
    <a href="https://html.spec.whatwg.org/multipage/history.html#traverse-the-history-by-a-delta">https://html.spec.whatwg.org/multipage/history.html#traverse-the-history-by-a-delta</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-traverse-the-history-by-a-delta">1. Close signals</a>
+    <li><a href="#ref-for-traverse-the-history-by-a-delta①">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-user-interaction-task-source">
@@ -1246,6 +1276,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://w3c.github.io/uievents/#event-type-keydown">https://w3c.github.io/uievents/#event-type-keydown</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-event-type-keydown">1. Close signals</a> <a href="#ref-for-event-type-keydown①">(2)</a>
+    <li><a href="#ref-for-event-type-keydown②">3.2. Privacy considerations</a> <a href="#ref-for-event-type-keydown③">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-idl-DOMException">
@@ -1331,11 +1362,13 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-fully-active">fully active</span>
      <li><span class="dfn-paneled" id="term-for-last-activation-timestamp">last activation timestamp</span>
      <li><span class="dfn-paneled" id="term-for-attr-dialog-open">open</span>
+     <li><span class="dfn-paneled" id="term-for-event-popstate">popstate</span>
      <li><span class="dfn-paneled" id="term-for-queue-a-global-task">queue a global task</span>
      <li><span class="dfn-paneled" id="term-for-queue-a-task">queue a task</span>
      <li><span class="dfn-paneled" id="term-for-concept-relevant-global">relevant global object</span>
      <li><span class="dfn-paneled" id="term-for-dom-dialog-showmodal">showModal()</span>
      <li><span class="dfn-paneled" id="term-for-transient-activation">transient activation</span>
+     <li><span class="dfn-paneled" id="term-for-activation-consuming-api">transient activation-consuming api</span>
      <li><span class="dfn-paneled" id="term-for-traverse-the-history-by-a-delta">traverse the history by a delta</span>
      <li><span class="dfn-paneled" id="term-for-user-interaction-task-source">user interaction task source</span>
     </ul>
@@ -1409,12 +1442,14 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-close-signal">1.2. Close watcher API</a> <a href="#ref-for-close-signal①">(2)</a> <a href="#ref-for-close-signal②">(3)</a>
     <li><a href="#ref-for-close-signal③">2.1. Fullscreen</a>
     <li><a href="#ref-for-close-signal④">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-signal⑤">3.1. Security considerations</a> <a href="#ref-for-close-signal⑥">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-signal-steps">
    <b><a href="#close-signal-steps">#close-signal-steps</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-close-signal-steps">2.1. Fullscreen</a>
+    <li><a href="#ref-for-close-signal-steps①">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher-stack">
@@ -1423,6 +1458,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-close-watcher-stack">1.1. Close watcher infrastructure</a> <a href="#ref-for-close-watcher-stack①">(2)</a> <a href="#ref-for-close-watcher-stack②">(3)</a> <a href="#ref-for-close-watcher-stack③">(4)</a>
     <li><a href="#ref-for-close-watcher-stack④">1.2. Close watcher API</a>
     <li><a href="#ref-for-close-watcher-stack⑤">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher-stack⑥">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="timestamp-of-last-activation-used-for-close-watchers">
@@ -1441,6 +1477,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-close-watcher③">1.2. Close watcher API</a>
     <li><a href="#ref-for-close-watcher④">2.1. Fullscreen</a>
     <li><a href="#ref-for-close-watcher⑤">2.2. The dialog element</a>
+    <li><a href="#ref-for-close-watcher⑥">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="close-watcher-close-action">
@@ -1479,6 +1516,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-check-if-we-can-create-a-developer-controlled-close-watcher">1.2. Close watcher API</a>
     <li><a href="#ref-for-check-if-we-can-create-a-developer-controlled-close-watcher①">2.2. The dialog element</a>
+    <li><a href="#ref-for-check-if-we-can-create-a-developer-controlled-close-watcher②">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="closewatcher">
@@ -1486,6 +1524,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-closewatcher">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-closewatcher①">1.2. Close watcher API</a> <a href="#ref-for-closewatcher②">(2)</a> <a href="#ref-for-closewatcher③">(3)</a> <a href="#ref-for-closewatcher④">(4)</a> <a href="#ref-for-closewatcher⑤">(5)</a> <a href="#ref-for-closewatcher⑥">(6)</a> <a href="#ref-for-closewatcher⑦">(7)</a> <a href="#ref-for-closewatcher⑧">(8)</a>
+    <li><a href="#ref-for-closewatcher⑨">3.1. Security considerations</a> <a href="#ref-for-closewatcher①⓪">(2)</a> <a href="#ref-for-closewatcher①①">(3)</a>
+    <li><a href="#ref-for-closewatcher①②">3.2. Privacy considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="closewatcher-is-active">
@@ -1504,6 +1544,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <b><a href="#dom-closewatcher-closewatcher">#dom-closewatcher-closewatcher</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-dom-closewatcher-closewatcher">1.2. Close watcher API</a> <a href="#ref-for-dom-closewatcher-closewatcher①">(2)</a>
+    <li><a href="#ref-for-dom-closewatcher-closewatcher②">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-closewatcher-destroy">
@@ -1535,12 +1576,14 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-eventdef-closewatcher-cancel">1.1. Close watcher infrastructure</a>
     <li><a href="#ref-for-eventdef-closewatcher-cancel①">1.2. Close watcher API</a>
+    <li><a href="#ref-for-eventdef-closewatcher-cancel②">3.1. Security considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="eventdef-closewatcher-close">
    <b><a href="#eventdef-closewatcher-close">#eventdef-closewatcher-close</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-eventdef-closewatcher-close">1.2. Close watcher API</a> <a href="#ref-for-eventdef-closewatcher-close①">(2)</a> <a href="#ref-for-eventdef-closewatcher-close②">(3)</a> <a href="#ref-for-eventdef-closewatcher-close③">(4)</a>
+    <li><a href="#ref-for-eventdef-closewatcher-close④">3.2. Privacy considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="closewatcher-signal-close">
