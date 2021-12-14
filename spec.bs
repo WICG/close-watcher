@@ -22,6 +22,7 @@ Assume Explicit For: yes
 <pre class="anchors">
 spec: ui-events; urlPrefix: https://w3c.github.io/uievents/#
   text: keydown; type: event; url: event-type-keydown
+  text: keyup; type: event; url: event-type-keyup
 </pre>
 
 <style>
@@ -100,7 +101,7 @@ In an [=implementation-defined=] (and likely device-specific) manner, a user can
 
   * The <kbd>Esc</kbd> key on desktop platforms
   * The back button on Android
-  * The two-finger scrub "z" gesture on iOS when using VoiceOver
+  * The two-finger scrub "z" gesture on iOS when using VoiceOver (or, more generally, any assistive technology dismiss gesture)
   * The square button on a DualShock (PlayStation) controller
 </div>
 
@@ -109,6 +110,9 @@ Whenever the user agent receives a potential close signal targeted at a {{Docume
 1. If |document|'s [=fullscreen element=] is non-null, then <a spec="FULLSCREEN">fully exit fullscreen</a> and return.
    <p class="note">This does <em>not</em> fire any relevant event, such as {{keydown}}; it only fires {{Document/fullscreenchange}}.
 1. Fire any relevant event, per <cite>UI Events</cite> or other relevant specifications. [[!UI-EVENTS]]
+   <p class="note">As an example of a relevant event that is outside of the model given in <cite>UI Events</cite>, current thinking is that assistive technology would <a href="https://github.com/WICG/aom/blob/gh-pages/explainer.md#user-action-events-from-assistive-technology">synthesize</a> an <kbd>Esc</kbd> {{keydown}} and {{keyup}} event sequence when the user sends a [=close signal=] by using a dimiss gesture.</p>
+   If multiple such events are fired, the user agent must pick one for the purposes of the following steps.
+   <p class="note">For example, it is typical on desktop platforms for pressing <em>down</em> on the <kbd>Esc</kbd> key to be a [=close signal=]. So, if assistive technology is synthesizing both {{keydown}} and {{keyup}} events, then it would likely pick the {{keydown}} event for the next steps, to better match behavior of desktop platforms without assistive technology in play.</p>
 1. If such an event was fired, and its [=Event/canceled flag=] is set, then return.
 1. If such an event was fired, then perform the following steps within the same task as that event was fired in, immediately after firing the event. Otherwise, [=queue a global task=] on the [=user interaction task source=] given |document|'s [=relevant global object=] to perform the following steps.
 1. If |document| is not [=Document/fully active=], then return.

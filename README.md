@@ -13,7 +13,7 @@ Various UI components have a "modal" or "popup" behavior. For example:
 
 An important common feature of these components is that they are designed to be easy to close, with a uniform interaction mechanism for doing so. Typically, this is the <kbd>Esc</kbd> key on desktop platforms, and the back button on some mobile platforms (notably Android). Game consoles also tend to use a specific button as their "close/cancel/back" button. Finally, accessibility technology sometimes provides specific close signals for their users, e.g. iOS VoiceOver's "dismiss an alert or return to the previous screen" [gesture](https://support.apple.com/guide/iphone/learn-voiceover-gestures-iph3e2e2281/ios#:~:text=Dismiss%20an%20alert%20or%20return%20to%20the%20previous%20screen).
 
-We define a **close signal** as a _platform-mediated_ interaction that's intended to close an in-page component. This is distinct from _page-mediated_ interactions, such as clicking on an "x" or "Done" button, or clicking on the backdrop outside of the modal.
+We define a **close signal** as a _platform-mediated_ interaction that's intended to close an in-page component. This is distinct from _page-mediated_ interactions, such as clicking on an "x" or "Done" button, or clicking on the backdrop outside of the modal. See our [platform-specific notes](./platform-implementation-notes.md) for more details on what close signals look like on various platforms.
 
 Currently, web developers have no good way to handle these close signals. This is especially problematic on Android devices, where the back button is the traditional close signal. Imagine a user filling in a twenty-field form, with the last item being a custom date picker modal. The user might click the back button hoping to close the date picker, like they would in a native app. But instead, the back button navigates the web page's history tree, likely closing the whole form and losing the filled information. But the problem of how to handle close signals extends across all operating systems; implementing a good experience for users of different browsers, platforms, and accessibility technologies requires a lot of user agent sniffing today.
 
@@ -27,7 +27,7 @@ Our primary goals are as follows:
 
 - Discourage platform-specific code for handling modal close signals, by providing an API that abstracts away the differences.
 
-- Allow future platforms to introduce new close signals (e.g., a "swipe away" gesture), such that code written against the API proposed here automatically works on such platforms.
+- Allow future platforms to introduce new close signals (e.g., the introduction of the swipe-from-the-sides dismiss gesture in Android 10), such that code written against the API proposed here automatically works on such platforms.
 
 - Prevent abuse that traps the user on a given history state by disabling the back button's ability to actually navigate backward in history.
 
@@ -47,7 +47,9 @@ The following is a goal we wish we could meet, but don't believe is possible to 
 
 On desktop platforms, this problem is currently solved by listening for the `keydown` event, and closing the component when the <kbd>Esc</kbd> key is pressed. Built-in platform APIs, such as [`<dialog>`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/showModal), [fullscreen](https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API), or [`<input type="date">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/date), will do this automatically. Note that this can be easy to get wrong, e.g. by accidentally listening for `keyup` or `keypress`.
 
-On mobile platforms, getting the right behavior is significantly harder. First, platform-specific code is required, to do nothing on iOS (or, perhaps, try to detect VoiceOver and then intercept its "z" gesture?), capture the back button on Android, and listen for gamepad inputs on PlayStation browser. Next, capturing the back button on Android requires manipulating the history list using the [history API](https://developer.mozilla.org/en-US/docs/Web/API/History_API). This is a poor fit for several reasons:
+On mobile platforms, getting the right behavior is significantly harder. First, platform-specific code is required, to do nothing on iOS, capture the back button or swipe-from-the-sides gesture on Android, and listen for gamepad inputs on PlayStation browser.
+
+Next, capturing the back button on Android requires manipulating the history list using the [history API](https://developer.mozilla.org/en-US/docs/Web/API/History_API). This is a poor fit for several reasons:
 
 - This UI state is non-navigational, i.e., the URL doesn't and shouldn't change when opening a component. When the page is reloaded or shared, web developers generally don't want to automatically re-open the same component.
 
