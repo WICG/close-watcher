@@ -1,5 +1,7 @@
 # Close Watchers
 
+_Read on for the full story, or check out [the demo](https://close-watcher-demo.glitch.me/)!_
+
 ## The problem
 
 Various UI components have a "modal" or "popup" behavior. For example:
