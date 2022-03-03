@@ -282,9 +282,7 @@ Replace the "Canceling dialogs" section entirely with the following definition. 
     1. Set |window|'s [=timestamp of last activation used for close watchers=] to |window|'s <a spec="HTML">last activation timestamp</a>.
     1. If |shouldContinue| is false, then return.
 
-  1. If |dialog| has an <{dialog/open}> content attribute, then <a spec="HTML" lt="close">close the dialog</a> |dialog| with no return value.
-
-     <p class="note">We need to check for the attribute since any {{HTMLElement/cancel}} event handlers might have removed it.
+  1. <a spec="HTML" lt="close">Close the dialog</a> |dialog| with no return value.
 </div>
 
 <h2 id="security-and-privacy">Security and privacy considerations</h2>
