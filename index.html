@@ -4,7 +4,7 @@
   <title>Close Watcher API</title>
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version cace53f8c, updated Tue Dec 7 12:12:54 2021 -0800" name="generator">
+  <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://wicg.github.io/close-watcher/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -649,7 +649,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Close Watcher API</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2021-12-14">14 December 2021</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2022-03-07">7 March 2022</time></p>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt class="editor">Editor:
@@ -661,7 +661,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     </dl>
    </div>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2021 the Contributors to the Close Watcher API Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
+   <p class="copyright" data-fill-with="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2022 the Contributors to the Close Watcher API Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
 A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/">summary</a> is available. </p>
    <hr title="Separator for header">
   </div>
@@ -949,8 +949,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>If <var>shouldContinue</var> is false, then return.</p>
       </ol>
      <li data-md>
-      <p>If <var>dialog</var> has an <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-open" id="ref-for-attr-dialog-open">open</a></code> content attribute, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#close-the-dialog" id="ref-for-close-the-dialog">close the dialog</a> <var>dialog</var> with no return value.</p>
-      <p class="note" role="note">We need to check for the attribute since any <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel" id="ref-for-event-cancel②">cancel</a></code> event handlers might have removed it. </p>
+      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interactive-elements.html#close-the-dialog" id="ref-for-close-the-dialog">Close the dialog</a> <var>dialog</var> with no return value.</p>
     </ol>
    </div>
    <h2 class="heading settled" data-level="3" id="security-and-privacy"><span class="secno">3. </span><span class="content">Security and privacy considerations</span><a class="self-link" href="#security-and-privacy"></a></h2>
@@ -1108,7 +1107,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://html.spec.whatwg.org/multipage/indices.html#event-cancel">https://html.spec.whatwg.org/multipage/indices.html#event-cancel</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-event-cancel">1.1. Close watcher infrastructure</a>
-    <li><a href="#ref-for-event-cancel①">2.2. The dialog element</a> <a href="#ref-for-event-cancel②">(2)</a>
+    <li><a href="#ref-for-event-cancel①">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-close-the-dialog">
@@ -1157,12 +1156,6 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-last-activation-timestamp">1.1. Close watcher infrastructure</a> <a href="#ref-for-last-activation-timestamp①">(2)</a>
     <li><a href="#ref-for-last-activation-timestamp②">1.2. Close watcher API</a> <a href="#ref-for-last-activation-timestamp③">(2)</a>
     <li><a href="#ref-for-last-activation-timestamp④">2.2. The dialog element</a> <a href="#ref-for-last-activation-timestamp⑤">(2)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="term-for-attr-dialog-open">
-   <a href="https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-open">https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-open</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-attr-dialog-open">2.2. The dialog element</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-event-popstate">
@@ -1370,7 +1363,6 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-event-handler-idl-attributes">event handler idl attribute</span>
      <li><span class="dfn-paneled" id="term-for-fully-active">fully active</span>
      <li><span class="dfn-paneled" id="term-for-last-activation-timestamp">last activation timestamp</span>
-     <li><span class="dfn-paneled" id="term-for-attr-dialog-open">open</span>
      <li><span class="dfn-paneled" id="term-for-event-popstate">popstate</span>
      <li><span class="dfn-paneled" id="term-for-queue-a-global-task">queue a global task</span>
      <li><span class="dfn-paneled" id="term-for-queue-a-task">queue a task</span>
