@@ -155,6 +155,22 @@ Note that the `cancel` event is not fired when the user navigates away from the 
 
 If called from within transient user activation, `watcher.close()` also invokes `cancel` event handlers, which would trigger event listeners like the above example code. If called without user activation, then it skips straight to the `close` event.
 
+### Using `AbortSignal`s to destroy `CloseWatcher`s
+
+As discussed above, destroying a `CloseWatcher` using `watcher.destroy()` is helpful to avoid any future events and free up the free `CloseWatcher` slot.
+
+Another way to destroy `CloseWatcher`s is by using `AbortSignal` objects, like so:
+
+```js
+const controller = new AbortController();
+const watcher = new CloseWatcher({ signal: controller.signal });
+
+// ... later ...
+controller.abort();
+```
+
+If the `AbortSignal` is only being used for the `CloseWatcher`, this is not that helpful. But it works nicely when you are using the `AbortSignal` to abort many ongoing operations or dispose of many different resources.
+
 ### Abuse analysis
 
 As discussed [above](#user-activation-gating), for platforms like Android where the close signal is to use the back button, we need to prevent abuse that traps the user on a page by effectively disabling their back button. The user activation gating is intended to combat that.
