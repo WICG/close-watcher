@@ -834,7 +834,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <a class="idl-code" data-link-type="constructor" href="#dom-closewatcher-closewatcher" id="ref-for-dom-closewatcher-closewatcher"><c- g>constructor</c-></a>();
 
   <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-undefined" id="ref-for-idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-destroy" id="ref-for-dom-closewatcher-destroy"><c- g>destroy</c-></a>();
-  <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-undefined" id="ref-for-idl-undefined①"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-signalclose" id="ref-for-dom-closewatcher-signalclose"><c- g>signalClose</c-></a>();
+  <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-undefined" id="ref-for-idl-undefined①"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-close" id="ref-for-dom-closewatcher-close"><c- g>close</c-></a>();
 
   <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-oncancel" id="ref-for-dom-closewatcher-oncancel"><c- g>oncancel</c-></a>;
   <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler①"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-onclose" id="ref-for-dom-closewatcher-onclose"><c- g>onclose</c-></a>;
@@ -849,10 +849,10 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <dd>
      <p>Deactivates this <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher③">CloseWatcher</a></code> instance, so that it will no longer receive <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close">close</a></code> events and so that new <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher④">CloseWatcher</a></code> instances can be constructed. </p>
      <p>This is intended to be called if the relevant UI element is closed in some other way than via a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal②">close signal</a>, e.g. by pressing an explicit "Close" button. </p>
-    <dt><code><var>watcher</var>.<code class="idl"><a data-link-type="idl" href="#dom-closewatcher-signalclose" id="ref-for-dom-closewatcher-signalclose①">signalClose</a></code>()</code>
+    <dt><code><var>watcher</var>.<code class="idl"><a data-link-type="idl" href="#dom-closewatcher-close" id="ref-for-dom-closewatcher-close①">close</a></code>()</code>
     <dd>
      <p>Acts as if a <a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal③">close signal</a> was sent targeting this <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑤">CloseWatcher</a></code> instance, by firing a <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close①">close</a></code> event and deactivating the close watcher as if <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-destroy" id="ref-for-dom-closewatcher-destroy②">destroy()</a></code> was called. </p>
-     <p>This is a helper utility that can be used to consolidate closing logic into the <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close②">close</a></code> event handler, by having all non-<a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal④">close signal</a> closing affordances call <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-signalclose" id="ref-for-dom-closewatcher-signalclose②">signalClose()</a></code>. </p>
+     <p>This is a helper utility that can be used to consolidate closing logic into the <code class="idl"><a data-link-type="idl" href="#eventdef-closewatcher-close" id="ref-for-eventdef-closewatcher-close②">close</a></code> event handler, by having all non-<a data-link-type="dfn" href="#close-signal" id="ref-for-close-signal④">close signal</a> closing affordances call <code class="idl"><a data-link-type="idl" href="#dom-closewatcher-close" id="ref-for-dom-closewatcher-close②">close()</a></code>. </p>
    </dl>
    <p>Each <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑥">CloseWatcher</a></code> has an <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-is-active">is active</dfn>, which is a boolean, and an <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-firing-cancel-event">firing cancel event</dfn>, which is a boolean.</p>
    <div class="algorithm" data-algorithm="CloseWatcher()" data-algorithm-for="CloseWatcher">
@@ -879,7 +879,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     </ol>
    </div>
    <p class="algorithm" data-algorithm="destroy()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-destroy"><code>destroy()</code></dfn> method steps are to set <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑦">this</a>'s <a data-link-type="dfn" href="#closewatcher-is-active" id="ref-for-closewatcher-is-active②">is active</a> to false. </p>
-   <p class="algorithm" data-algorithm="signalClose()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-signalclose"><code>signalClose()</code></dfn> method steps are to <a data-link-type="dfn" href="#closewatcher-signal-close" id="ref-for-closewatcher-signal-close①">signal close</a> on <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑧">this</a>. </p>
+   <p class="algorithm" data-algorithm="close()" data-algorithm-for="CloseWatcher"> The <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="method" data-export id="dom-closewatcher-close"><code>close()</code></dfn> method steps are to <a data-link-type="dfn" href="#closewatcher-signal-close" id="ref-for-closewatcher-signal-close①">signal close</a> on <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑧">this</a>. </p>
    <p>Objects implementing the <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑦">CloseWatcher</a></code> interface must support the <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="attribute" data-export id="dom-closewatcher-oncancel"><code>oncancel</code></dfn> and <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="attribute" data-export id="dom-closewatcher-onclose"><code>onclose</code></dfn> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes" id="ref-for-event-handler-idl-attributes">event handler IDL attribute</a>, whose <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-event-type" id="ref-for-event-handler-event-type">event handler event types</a> are respectively <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="event" data-export id="eventdef-closewatcher-cancel"><code>cancel</code></dfn> and <dfn class="dfn-paneled idl-code" data-dfn-for="CloseWatcher" data-dfn-type="event" data-export id="eventdef-closewatcher-close"><code>close</code></dfn>.</p>
    <div class="algorithm" data-algorithm="signal close" data-algorithm-for="CloseWatcher">
      To <dfn class="dfn-paneled" data-dfn-for="CloseWatcher" data-dfn-type="dfn" data-noexport id="closewatcher-signal-close">signal close</dfn> on a <code class="idl"><a data-link-type="idl" href="#closewatcher" id="ref-for-closewatcher⑧">CloseWatcher</a></code> <var>closeWatcher</var>: 
@@ -971,6 +971,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <li><a href="#cancel-the-dialog">cancel the dialog</a><span>, in § 2.2</span>
    <li><a href="#check-if-we-can-create-a-developer-controlled-close-watcher">check if we can create a developer-controlled close watcher</a><span>, in § 1.1</span>
    <li><a href="#eventdef-closewatcher-close">close</a><span>, in § 1.2</span>
+   <li><a href="#dom-closewatcher-close">close()</a><span>, in § 1.2</span>
    <li><a href="#close-watcher-close-action">close action</a><span>, in § 1.1</span>
    <li><a href="#close-signal">close signal</a><span>, in § 1</span>
    <li><a href="#close-signal-steps">close signal steps</a><span>, in § 1</span>
@@ -991,7 +992,6 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><a href="#signal-close">definition of</a><span>, in § 1.1</span>
      <li><a href="#closewatcher-signal-close">dfn for CloseWatcher</a><span>, in § 1.2</span>
     </ul>
-   <li><a href="#dom-closewatcher-signalclose">signalClose()</a><span>, in § 1.2</span>
    <li><a href="#timestamp-of-last-activation-used-for-close-watchers">timestamp of last activation used for close watchers</a><span>, in § 1.1</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-report-a-warning-to-the-console">
@@ -1431,7 +1431,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <a class="idl-code" data-link-type="constructor" href="#dom-closewatcher-closewatcher"><c- g>constructor</c-></a>();
 
   <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-destroy"><c- g>destroy</c-></a>();
-  <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-signalclose"><c- g>signalClose</c-></a>();
+  <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-undefined"><c- b>undefined</c-></a> <a class="idl-code" data-link-type="method" href="#dom-closewatcher-close"><c- g>close</c-></a>();
 
   <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-oncancel"><c- g>oncancel</c-></a>;
   <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-closewatcher-onclose"><c- g>onclose</c-></a>;
@@ -1556,10 +1556,10 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-dom-closewatcher-destroy">1.2. Close watcher API</a> <a href="#ref-for-dom-closewatcher-destroy①">(2)</a> <a href="#ref-for-dom-closewatcher-destroy②">(3)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="dom-closewatcher-signalclose">
-   <b><a href="#dom-closewatcher-signalclose">#dom-closewatcher-signalclose</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="dom-closewatcher-close">
+   <b><a href="#dom-closewatcher-close">#dom-closewatcher-close</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-closewatcher-signalclose">1.2. Close watcher API</a> <a href="#ref-for-dom-closewatcher-signalclose①">(2)</a> <a href="#ref-for-dom-closewatcher-signalclose②">(3)</a>
+    <li><a href="#ref-for-dom-closewatcher-close">1.2. Close watcher API</a> <a href="#ref-for-dom-closewatcher-close①">(2)</a> <a href="#ref-for-dom-closewatcher-close②">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-closewatcher-oncancel">
