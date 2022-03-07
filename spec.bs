@@ -176,7 +176,7 @@ interface CloseWatcher : EventTarget {
   constructor();
 
   undefined destroy();
-  undefined signalClose();
+  undefined close();
 
   attribute EventHandler oncancel;
   attribute EventHandler onclose;
@@ -198,11 +198,11 @@ interface CloseWatcher : EventTarget {
     <p>This is intended to be called if the relevant UI element is closed in some other way than via a [=close signal=], e.g. by pressing an explicit "Close" button.
   </dd>
 
-  <dt><code><var ignore>watcher</var>.{{CloseWatcher/signalClose()|signalClose}}()</code></dt>
+  <dt><code><var ignore>watcher</var>.{{CloseWatcher/close()|close}}()</code></dt>
   <dd>
     <p>Acts as if a [=close signal=] was sent targeting this {{CloseWatcher}} instance, by firing a {{CloseWatcher/close}} event and deactivating the close watcher as if {{CloseWatcher/destroy()}} was called.
 
-    <p>This is a helper utility that can be used to consolidate closing logic into the {{CloseWatcher/close}} event handler, by having all non-[=close signal=] closing affordances call {{CloseWatcher/signalClose()}}.
+    <p>This is a helper utility that can be used to consolidate closing logic into the {{CloseWatcher/close}} event handler, by having all non-[=close signal=] closing affordances call {{CloseWatcher/close()}}.
   </dd>
 </dl>
 
@@ -226,7 +226,7 @@ Each {{CloseWatcher}} has an <dfn for="CloseWatcher">is active</dfn>, which is a
 </p>
 
 <p algorithm>
-  The <dfn method for="CloseWatcher">signalClose()</dfn> method steps are to [=CloseWatcher/signal close=] on [=this=].
+  The <dfn method for="CloseWatcher">close()</dfn> method steps are to [=CloseWatcher/signal close=] on [=this=].
 </p>
 
 Objects implementing the {{CloseWatcher}} interface must support the <dfn attribute for="CloseWatcher">oncancel</dfn> and <dfn attribute for="CloseWatcher">onclose</dfn> [=event handler IDL attribute=], whose [=event handler event types=] are respectively <dfn event for="CloseWatcher">cancel</dfn> and <dfn event for="CloseWatcher">close</dfn>.

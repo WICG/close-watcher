@@ -106,7 +106,7 @@ Note that for developers, this means that calling `watcher.destroy()` properly i
 
 ### Signaling close yourself
 
-The API has an additional convenience method, `watcher.signalClosed()`, which acts _as if_ a close signal had been sent by the user. The intended use case is to allow centralizing close-handling code. So the above example of
+The API has an additional convenience method, `watcher.close()`, which acts _as if_ a close signal had been sent by the user. The intended use case is to allow centralizing close-handling code. So the above example of
 
 ```js
 watcher.onclose = () => myModal.close();
@@ -122,7 +122,7 @@ could be replaced by
 ```js
 watcher.onclose = () => myModal.close();
 
-myModalCloseButton.onclick = () => watcher.signalClosed();
+myModalCloseButton.onclick = () => watcher.close();
 ```
 
 deduplicating the `myModal.close()` call by having the developer put all their close-handling logic into the watcher's `close` event handler.
@@ -141,7 +141,7 @@ watcher.oncancel = async (e) => {
     const userReallyWantsToClose = await askForConfirmation("Are you sure you want to close this dialog?");
     if (userReallyWantsToClose) {
       hasUnsavedData = false;
-      watcher.signalClose();
+      watcher.close();
     }
   }
 };
@@ -153,7 +153,7 @@ For abuse prevention purposes, this event only fires if the page has received us
 
 Note that the `cancel` event is not fired when the user navigates away from the page: i.e., it has no overlap with `beforeunload`. `beforeunload` remains the best way to confirm a page unload, with `cancel` only used for confirming a close signal.
 
-If called from within transient user activation, `watcher.signalClosed()` also invokes `cancel` event handlers, which would trigger event listeners like the above example code. If called without user activation, then it skips straight to the `close` event.
+If called from within transient user activation, `watcher.close()` also invokes `cancel` event handlers, which would trigger event listeners like the above example code. If called without user activation, then it skips straight to the `close` event.
 
 ### Abuse analysis
 
@@ -215,7 +215,7 @@ hamburgerMenuButton.addEventListener('click', () => {
   // Close on clicks outside the sidebar.
   document.body.addEventListener('click', e => {
     if (e.target.closest('#sidebar') === null) {
-      watcher.signalClosed();
+      watcher.close();
     }
   });
 });
@@ -240,7 +240,7 @@ class MyPicker extends HTMLElement {
     this.#overlay = /* ... */;
     this.#overlay.hidden = true;
     this.#overlay.querySelector('.close-button').addEventListener('click', () => {
-      this.#watcher.signalClose();
+      this.#watcher.close();
     });
 
     this.#button.onclick = () => {
