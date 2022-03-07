@@ -173,7 +173,7 @@ A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/it
 <xmp class="idl">
 [Exposed=Window]
 interface CloseWatcher : EventTarget {
-  constructor();
+  constructor(optional CloseWatcherOptions options = {});
 
   undefined destroy();
   undefined close();
@@ -181,12 +181,19 @@ interface CloseWatcher : EventTarget {
   attribute EventHandler oncancel;
   attribute EventHandler onclose;
 };
+
+dictionary CloseWatcherOptions {
+  AbortSignal signal;
+};
 </xmp>
 
 <dl class="domintro non-normative">
   <dt><code><var ignore>watcher</var> = new {{CloseWatcher/constructor()|CloseWatcher}}()</code></dt>
+  <dt><code><var ignore>watcher</var> = new {{CloseWatcher/constructor()|CloseWatcher}}({ {{CloseWatcherOptions/signal}} })</code></dt>
   <dd>
     <p>Attempts to create a new {{CloseWatcher}} instance.
+
+    <p>If the {{CloseWatcherOptions/signal}} option is provided, <var ignore>watcher</var> can be destroyed (as if by <code><var ignore>watcher</var>.{{CloseWatcher/destroy()}}</code>) by aborting the given {{AbortSignal}}.
 
     <p>If a {{CloseWatcher}} is already active, and the {{Window}} does not have [=transient activation|transient user activation=], then this will instead throw a "{{NotAllowedError}}" {{DOMException}}.
   </dd>
@@ -209,12 +216,16 @@ interface CloseWatcher : EventTarget {
 Each {{CloseWatcher}} has an <dfn for="CloseWatcher">is active</dfn>, which is a boolean, and an <dfn for="CloseWatcher">firing cancel event</dfn>, which is a boolean.
 
 <div algorithm>
-  The <dfn constructor for="CloseWatcher" lt="CloseWatcher()">new CloseWatcher()</dfn> constructor steps are:
+  The <dfn constructor for="CloseWatcher" lt="CloseWatcher()">new CloseWatcher(|options|)</dfn> constructor steps are:
 
   1. If [=this=]'s [=relevant global object=]'s [=associated Document=] is not [=Document/fully active=], then throw an "{{InvalidStateError}}" {{DOMException}}.
   1. If the result of [=checking if we can create a developer-controlled close watcher=] for [=this=]'s [=relevant global object=] is false, then throw a "{{NotAllowedError}}" {{DOMException}}.
   1. Set [=this=]'s [=CloseWatcher/is active=] to true.
   1. Set [=this=]'s [=CloseWatcher/firing cancel event=] to false.
+  1. If |options|["{{CloseWatcherOptions/signal}}"] [=map/exists=], then:
+    1. If |options|["{{CloseWatcherOptions/signal}}"] is [=AbortSignal/aborted=], then set [=this=]'s [=CloseWatcher/is active=] to false and return.
+    1. [=AbortSignal/add|Add the following abort steps=] to |options|["{{CloseWatcherOptions/signal}}"]:
+      1. Set [=this=]'s [=CloseWatcher/is active=] to false.
   1. [=stack/Push=] a new [=close watcher=] on [=this=]'s [=relevant global object=]'s [=associated document=]'s [=close watcher stack=], with its [=struct/items=] set as follows:
     * [=close watcher/close action=] being to [=CloseWatcher/signal close=] on [=this=]
     * [=close watcher/is still valid=] steps being to return [=this=]'s [=CloseWatcher/is active=]
