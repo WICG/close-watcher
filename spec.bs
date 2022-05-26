@@ -116,13 +116,13 @@ Whenever the user agent receives a potential close signal targeted at a {{Docume
 1. If such an event was fired, and its [=Event/canceled flag=] is set, then return.
 1. If such an event was fired, then perform the following steps within the same task as that event was fired in, immediately after firing the event. Otherwise, [=queue a global task=] on the [=user interaction task source=] given |document|'s [=relevant global object=] to perform the following steps.
 1. If |document| is not [=Document/fully active=], then return.
-1. Let |closedSomething| be the result of [=signaling close=] on |document|.
+1. Let |closedSomething| be the result of [=signaling close watchers=] on |document|'s [=relevant global object=].
 1. If |closedSomething| was true, then return.
 1. Otherwise, there was nothing watching for a close signal. The user agent may instead interpret this interaction as some other action, instead of as a close signal.
 
-<p class="example" id="example-desktop-esc-sequence">On a desktop platform where <kbd>Esc</kbd> is the close signal, the user agent will first fire an appropriately-initialized {{keydown}} event. If the web developer intercepts this event and calls {{Event/preventDefault()}}, then nothing further happens. But if the event is fired without being canceled, then the user agent proceeds to [=signal close=].
+<p class="example" id="example-desktop-esc-sequence">On a desktop platform where <kbd>Esc</kbd> is the close signal, the user agent will first fire an appropriately-initialized {{keydown}} event. If the web developer intercepts this event and calls {{Event/preventDefault()}}, then nothing further happens. But if the event is fired without being canceled, then the user agent proceeds to [=signal close watchers=].
 
-<p class="example" id="example-android-back-sequence">On Android where the back button is a potential close signal, no event is involved, so when the user agent determines that the back button represents a close signal, it [=queues a task=] to [=signal close=]. If there is a [=close watcher=] on the [=close watcher stack=], then that will get triggered; otherwise, the user agent will interpret the back button press as a request to <a spec="HTML">traverse the history by a delta</a> of &minus;1.
+<p class="example" id="example-android-back-sequence">On Android where the back button is a potential close signal, no event is involved, so when the user agent determines that the back button represents a close signal, it [=queues a task=] to [=signal close watchers=]. If there is a [=close watcher=] on the [=close watcher stack=], then that will get triggered; otherwise, the user agent will interpret the back button press as a request to <a spec="HTML">traverse the history by a delta</a> of &minus;1.
 
 <h3 id="close-watchers">Close watcher infrastructure</h3>
 
@@ -137,17 +137,16 @@ Each {{Window}} has a <dfn export>timestamp of last activation used for close wa
 A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/items=]:
 
 * A <dfn for="close watcher">window</dfn>, a {{Window}}.
-* A <dfn for="close watcher">cancel action</dfn>, a list of steps. These steps can never throw an exception, and return either true (to indicate the caller will proceed to the [=close watcher/close action=] or false (to indicate the caller will bail out).
+* A <dfn for="close watcher">cancel action</dfn>, a list of steps. These steps can never throw an exception, and return either true (to indicate the caller will proceed to the [=close watcher/close action=]) or false (to indicate the caller will bail out).
 * A <dfn for="close watcher">close action</dfn>, a list of steps. These steps can never throw an exception.
-* An <dfn for="close watcher">is active</dfn> boolean, initially true.
-* A <dfn for="close watcher">is running cancel action</dfn> boolean, initially false.
+* An <dfn for="close watcher">is running cancel action</dfn> boolean, initially false.
 
 <div algorithm="create a close watcher">
   To <dfn>create a close watcher</dfn> given a {{Window}} |window|, a list of steps <dfn for="create a close watcher">|cancelAction|</dfn>, and a list of steps <dfn for="create a close watcher">|closeAction|</dfn>:
 
   1. [=Assert=]: |window|'s [=associated Document=] is [=Document/fully active=].
   1. Let |stack| be |window|'s [=close watcher stack=].
-  1. Let |needsUserActivation| be true if |stack| [=list/contains=] a [=close watcher=] whose [=close watcher/is active=] is true; otherwise false.
+  1. Let |needsUserActivation| be true if |stack| is not empty; false otherwise.
   1. Let |canCreate| be false.
   1. If |needsUserActivation| is false, then set |canCreate| to true.
   1. Otherwise, if |window| has [=transient activation=], then:
@@ -161,9 +160,17 @@ A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/it
 </div>
 
 <div algorithm>
+  <p>A [=close watcher=] |closeWatcher| <dfn for="close watcher" lt="is active|is not active">is active</dfn> if |closeWatcher|'s [=close watcher/window=]'s [=close watcher stack=] [=list/contains=] |closeWatcher|.
+</div>
+
+<div algorithm>
+  <p>To <dfn for="close watcher">destroy</dfn> a [=close watcher=] |closeWatcher|, [=list/remove=] |closeWatcher| from |closeWatcher|'s [=close watcher/window=]'s [=close watcher stack=].
+</div>
+
+<div algorithm>
   To <dfn for="close watcher">close</dfn> a [=close watcher=] |closeWatcher|:
 
-  1. If |closeWatcher|'s [=close watcher/is active=] is false, then return.
+  1. If |closeWatcher| [=close watcher/is not active=], then return.
   1. If |closeWatcher|'s [=close watcher/is running cancel action=] is true, then return.
   1. Let |window| be |closeWatcher|'s [=close watcher/window=].
   1. If |window|'s [=associated Document=] is [=Document/fully active=], and |window|'s [=timestamp of last activation used for close watchers=] does not equal |window|'s <a spec="HTML">last activation timestamp</a>, then:
@@ -172,27 +179,17 @@ A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/it
     1. Let |shouldContinue| be the result of running |closeWatcher|'s [=close watcher/cancel action=].
     1. Set |closeWatcher|'s [=close watcher/is running cancel action=] to false.
     1. If |shouldContinue| is false, then return.
-  1. If |closeWatcher|'s [=close watcher/is active=] is false, then return.
+  1. If |closeWatcher| [=close watcher/is not active=], then return.
   1. If |window|'s [=associated Document=] is not [=Document/fully active=], then return.
   1. [=list/Remove=] |closeWatcher| from |window|'s [=close watcher stack=].
-  1. Set |closeWatcher|'s [=close watcher/is active=] to false.
   1. Run |closeWatcher|'s [=close watcher/close action=].
 </div>
 
 <div algorithm>
-  To <dfn for="close watcher">destroy</dfn> a [=close watcher=] |closeWatcher|:
-
-  1. If |closeWatcher|'s [=close watcher/is active=] is false, then return.
-  1. [=list/Remove=] |closeWatcher| from |closeWatcher|'s [=close watcher/window=]'s [=close watcher stack=].
-  1. Set |closeWatcher|'s [=close watcher/is active=] to false.
-</div>
-
-<div algorithm>
-  To <dfn>signal close</dfn> given a {{Window}} |window|:
+  To <dfn>signal close watchers</dfn> given a {{Window}} |window|:
 
   1. If |window|'s [=close watcher stack=] is empty, then return false.
   1. Let |closeWatcher| be the last item in |window|'s [=close watcher stack=].
-  1. Assert: |closeWatcher|'s [=close watcher/is active=] is true.
   1. [=close watcher/Close=] |closeWatcher|.
   1. Return true.
 </div>
