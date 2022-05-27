@@ -68,8 +68,6 @@ Next, capturing the back button on Android requires manipulating the history lis
 The proposal is to introduce a new API, the `CloseWatcher` class, which has the following basic API:
 
 ```js
-// Note: the constructor will throw a "NotAllowedError" DOMException, if used
-// too many times without user interaction.
 const watcher = new CloseWatcher();
 
 // This fires when the user sends a close signal, e.g. by pressing Esc on
@@ -86,23 +84,9 @@ myModalCloseButton.onclick = () => {
 };
 ```
 
-If more than one `CloseWatcher` is active at a given time, then only the most-recently-constructed one gets events delivered to it. A watcher becomes inactive after a `close` event is delivered, or the watcher is explicitly `destroy()`ed.
-
-Notably, on some platforms, an active `CloseWatcher` could prevent normal handling of the close signal (e.g., the back button on Android). This is why we need the `new CloseWatcher()` constructor and its user activation gating; if we were just dealing with <kbd>Esc</kbd> keypresses or other close signals of equivalent power, we could use [a single event](#a-single-event) instead of a class.
+If more than one `CloseWatcher` is active at a given time, then only the most-recently-constructed one gets events delivered to it. ([Usually](#user-activation-grouping).) A watcher becomes inactive after a `close` event is delivered, or the watcher is explicitly `destroy()`ed.
 
 Read on for more details and realistic usage examples.
-
-### User activation gating
-
-It was mentioned above that the `new CloseWatcher()` constructor can throw if called too many times without user activation. Specifically, the design is that the page gets one "free" active `CloseWatcher` at a time. After that, any further `CloseWatcher` constructions require [transient activation](https://html.spec.whatwg.org/multipage/interaction.html#transient-activation-gated-api), i.e., the construction must happen as part of or shortly after a user interaction event like `click`, `pointerup`, or `keydown`.
-
-The motivation for this is that, for platforms like Android where the modal close gesture is to use the back button, we need to prevent abuse that traps the user on a page by effectively disabling their back button. This restriction means that the back button can only be intercepted as many times as user activation was given to the document, plus one.
-
-(The same logic extends more generally to any platform where a close signal action might have an important fallback interpretation. The Android back button falling back to history navigation is the current known example, but one of the [goals](#goals) is to be extensible to future platforms and user interaction paradigms.)
-
-The allowance for a single non-activation-triggered `CloseWatcher` is to allow use cases like "session inactivity timeout" modals, or high-priority interrupt popups. The page can create a single one of these at a given time, which we believe strikes a good balance between meeting realistic use cases and preventing abuse.
-
-Note that for developers, this means that calling `watcher.destroy()` properly is important, as doing so will free up the "free `CloseWatcher` slot", if it has been previously consumed.
 
 ### Signaling close yourself
 
@@ -149,11 +133,37 @@ watcher.oncancel = async (e) => {
 
 _Note: the name of this event, i.e. `cancel` instead of something like `beforeclose`, is chosen to match `<dialog>`, which has the same two-tier `cancel` + `close` event sequence._
 
-For abuse prevention purposes, this event only fires if the page has received user activation. Furthermore, once it fires for one `CloseWatcher` instance, it will not fire again for any `CloseWatcher` instances until the page again gets user activation. This ensures that if the user sends a close signal twice in a row without any intervening user activation, the signal definitely goes through, destroying the `CloseWatcher`.
+For abuse prevention purposes, this event only fires if the page has received [transient user activation](https://html.spec.whatwg.org/multipage/interaction.html#transient-activation-gated-api). Furthermore, once it fires for one `CloseWatcher` instance, it will not fire again for any `CloseWatcher` instances until the page gets user activation again. This ensures that if the user sends a close signal twice in a row without any intervening user activation, the signal definitely goes through, destroying the `CloseWatcher`.
 
 Note that the `cancel` event is not fired when the user navigates away from the page: i.e., it has no overlap with `beforeunload`. `beforeunload` remains the best way to confirm a page unload, with `cancel` only used for confirming a close signal.
 
 If called from within transient user activation, `watcher.close()` also invokes `cancel` event handlers, which would trigger event listeners like the above example code. If called without user activation, then it skips straight to the `close` event.
+
+### User activation grouping
+
+In addition to the user activation restrictions for `cancel` events, mentioned [above](#asking-for-confirmation), there is a more subtle form of user activation gating for `CloseWatcher` construction. The basic idea is that if you have created more than one `CloseWatcher` without user activation, then the newly-created one will get grouped together with the most-recently-created close watcher, so that a single close signal will close them both. This is meant to prevent [abuse](#abuse-analysis).
+
+So for example:
+
+```js
+window.onload = () => {
+  // This will work as normal: it is the first close watcher created without user activation.
+  (new CloseWatcher()).onclose = () => { /* ... */ };
+};
+
+button1.onclick = () => {
+  // This will work as normal: the button click counts as user activation.
+  (new CloseWatcher()).onclose = () => { /* ... */ };
+};
+
+button2.onclick = () => {
+  // These will be grouped together, and both will close in response to a singe close signal.
+  (new CloseWatcher()).onclose = () => { /* ... */ };
+  (new CloseWatcher()).onclose = () => { /* ... */ };
+};
+```
+
+Note that for developers, this means that calling `watcher.destroy()` properly is important. Doing so is the only way to get back the "free" ungrouped close watcher slot, that allows you to create an ungrouped `CloseWatcher` even without user activation. Such `CloseWatcher`s are useful for cases like session inactivity timeout dialogs, or urgent notifications of server-triggered events, that want to be closable with a close signal but are not created via user activation.
 
 ### Using `AbortSignal`s to destroy `CloseWatcher`s
 
@@ -173,12 +183,12 @@ If the `AbortSignal` is only being used for the `CloseWatcher`, this is not that
 
 ### Abuse analysis
 
-As discussed [above](#user-activation-gating), for platforms like Android where the close signal is to use the back button, we need to prevent abuse that traps the user on a page by effectively disabling their back button. The user activation gating is intended to combat that.
+As discussed above, we have various forms of user activation gating. These are meant to prevent abuse for platforms like Android where the close signal is to use the back button. There, we need to prevent abuse that traps the user on a page by effectively disabling their back button.
 
 In detail, a malicious page which wants to trap the user would be able to do at most the following using the `CloseWatcher` API:
 
 - If the user never interacts with the page:
-  - Create its "free" (i.e., not user-activation-gated) `CloseWatcher`
+  - Create its "free" (i.e., not user-activation-consuming, but also not grouped) `CloseWatcher`
   - The first Android back button press would destroy the `CloseWatcher`
   - The second Android back button press would navigate back through the joint session history, escaping the abusive page
 - If the user activates the page once:
@@ -283,11 +293,13 @@ The existing `<dialog>` implementation in Chromium implements this, but only wit
 
 Our proposal is to replace the vague specification sentence above with [text based on close watchers](https://wicg.github.io/close-watcher/#patch-dialog). This has a number of benefits:
 
-- It allows the Android back button to close dialogs, subject to anti-abuse restrictions. That is: the call to `dialogEl.showModal()` must be done with user activation or use up the free close watcher slot; and the `cancel` event will only fire if there's been an intervening user interaction.
+- It allows the Android back button to close dialogs, subject to anti-abuse restrictions. That is: the call to `dialogEl.showModal()` must be done with user activation or use up the free close watcher slot; and the `cancel` event will only fire if there's been an intervening user interaction; and if you open multiple `<dialog>`s within a single user activation, after using up your free one, a single close signal will close both of them.
 
-- It makes it clear how `<dialog>`s interact with `CloseWatcher` instances: they both live in the same per-`Document` close watcher stack.
+- It makes it clear how `<dialog>`s interact with `CloseWatcher` instances: they both live in the same per-`Window` close watcher stack.
 
 - It drives interoperability in terms of user- and developer-facing `<dialog>` behavior by providing a more concrete specification, e.g. with regards to how the `<dialog>`'s `cancel` event is sequenced versus the `keydown` event for <kbd>Esc</kbd> key presses.
+
+Note that the user activation "resource" is shared between everything that uses the general close watcher infrastructure: i.e., both `<dialog>` elements, and `CloseWatcher`s. So, for example, creating a `<dialog>` without user activation uses up the free close watcher slot, so that if you then proceed to create another `<dialog>` and construct a `CloseWatcher`, all without user activation, that `CloseWatcher` and the second `<dialog>` will be grouped together and both be closed by a single close signal.
 
 ### Integration with Fullscreen
 
@@ -317,13 +329,13 @@ Note that the line between "UI state" and "a navigation" can be blurry in single
 
 If we assume that developers already know to handle the <kbd>Esc</kbd> key to close their components, then we could potentially translate other close signals, like the Android back button, into <kbd>Esc</kbd> key presses. The hope is then that application and component developers wouldn't have to update their code at all: if they're doing the right thing for that common desktop close signal, they would suddenly start doing the right thing on other platforms as well. This is especially attractive as it could help avoid the awkward transition period mentioned in the [goals](#goals) section.
 
-However, upon reflection, such a solution doesn't really solve the general problem. Given an Android back button press, or a PlayStation square button press, or any other gesture which might serve multiple context-dependent purposes, the browser needs to know: should perform its usual action, or should it be translated to an <kbd>Esc</kbd> key press? For custom components, the only way to know is for the web developer to tell the browser that a close-signal-consuming component is open. So our goal of requiring no code modifications, or awkward transition period, is impossible. Given this, the strangeness of synthesizing fake <kbd>Esc</kbd> key presses does not have much to recommend it.
+However, upon reflection, such a solution doesn't really solve the general problem. Given an Android back button press, or a PlayStation square button press, or any other gesture which might serve multiple context-dependent purposes, the browser needs to know: should perform its usual action, or should it be translated to an <kbd>Esc</kbd> key press? For custom components, the only way to know is for the web developer to tell the browser that a close-signal-consuming component is open. So our goal of requiring no code modifications, or awkward transition period, is impossible. We'd still need some API, a counterpart to our `new CloseWatcher()`, which tells the browser that the next close signal should be turned into an <kbd>Esc</kbd> keypress. Given this, the strangeness of synthesizing fake <kbd>Esc</kbd> key presses in response to some other setup API does not have much to recommend it.
 
 ### A single event
 
 Why do we need the `CloseWatcher` class? Why couldn't we just fire a global `close` event or similar, which abstracts over platform differences in close signals?
 
-The problem here is similar to the previous idea of translating all close signals into an <kbd>Esc</kbd> key press. On some platforms, a close signal has an important fallback behavior. (Notably, on Android, where the fallback behavior is to perform a history navigation.) This means developers need some way of signaling to the browser that the next instance of such a close signal should be directed to their code, instead of performing that fallback action. And, we need to [gate](#user-activation-gating) the ability to redirect close signals in that way behind user activation.
+The problem here is similar to the previous idea of translating all close signals into an <kbd>Esc</kbd> key press. On some platforms, a close signal has an important fallback behavior. (Notably, on Android, where the fallback behavior is to perform a history navigation.) This means developers need some way of signaling to the browser that the next instance of such a close signal should be directed to their code, instead of performing that fallback action. And, we need to [gate](#user-activation-grouping) the ability to redirect close signals in that way behind user activation.
 
 A less fundamental benefit is for developer ergonomics. By having essentially one event per close watcher, we get a kind of stack for free. For example, if various modal or popup components (including `<dialog>` elements) use `CloseWatcher`s, then we can be sure to always route the event to the "topmost" (i.e., most-recently-created) modal. If we had just one global event, then such components would need to coordinate with each other to ensure that only the topmost acts on the event, and the others ignore it. In other words, the stack of `CloseWatcher` instances, which is pushed onto by the constructor and popped off of by `CloseWatcher` destruction, is a nice bonus for web developers.
 
@@ -349,9 +361,9 @@ In talking with web developers, this variant of the proposal was not as preferab
 
 ### No free close watcher
 
-As discussed [above](#user-activation-gating), this proposal gives pages the ability to create one "free" `CloseWatcher`, without user activation. This is meant for cases like session inactivity timeout dialogs or urgent notifications of server-triggered events that want a presentation that is closable with a close signal. However, it comes with a cost in terms of allowing [abusive pages](#abuse-analysis) to add 1 to the number of Android back button presses necessary to escape.
+As discussed [above](#user-activation-grouping), this proposal gives pages the ability to create one "free" `CloseWatcher`, which doesn't get grouped with others, even without user activation. This is meant for cases like session inactivity timeout dialogs or urgent notifications of server-triggered events that want a presentation that is closable with a close signal. However, it comes with a cost in terms of allowing [abusive pages](#abuse-analysis) to add 1 to the number of Android back button presses necessary to escape.
 
-We could remove this ability from the proposal, making it impossible to construct `CloseWatcher`s without user activation. This would reduce the number of Android back button presses by 1, from <var>N</var> + 2 to <var>N</var> + 1.
+We could remove this ability from the proposal, always grouping together `CloseWatcher`s created without user activation. This would reduce the number of Android back button presses by 1, from <var>N</var> + 2 to <var>N</var> + 1.
 
 ### Bundling this with high-level APIs
 
