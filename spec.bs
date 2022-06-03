@@ -139,22 +139,32 @@ A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/it
 * A <dfn for="close watcher">window</dfn>, a {{Window}}.
 * A <dfn for="close watcher">cancel action</dfn>, a list of steps. These steps can never throw an exception, and return either true (to indicate the caller will proceed to the [=close watcher/close action=]) or false (to indicate the caller will bail out).
 * A <dfn for="close watcher">close action</dfn>, a list of steps. These steps can never throw an exception.
+* An <dfn for="close watcher">was created with user activation</dfn> boolean.
+* An <dfn for="close watcher">is grouped with previous</dfn> boolean.
 * An <dfn for="close watcher">is running cancel action</dfn> boolean, initially false.
+
+<p class="note">The [=close watcher/is grouped with previous=] boolean is set if a [=close watcher=] is created without [=transient activation=]. (Except the very first [=close watcher=] in the [=close watcher stack=] that is created without transient activation, which gets a pass on this restriction.) It causes a user-triggered [=close signal=] to close all such grouped-together [=close watchers=], thus ensuring that web developers can't make [=close signals=] ineffective by creating an excessive number of [=close watchers=] which all intercept the signal.
 
 <div algorithm="create a close watcher">
   To <dfn>create a close watcher</dfn> given a {{Window}} |window|, a list of steps <dfn for="create a close watcher">|cancelAction|</dfn>, and a list of steps <dfn for="create a close watcher">|closeAction|</dfn>:
 
   1. [=Assert=]: |window|'s [=associated Document=] is [=Document/fully active=].
   1. Let |stack| be |window|'s [=close watcher stack=].
-  1. Let |needsUserActivation| be true if |stack| is not empty; false otherwise.
-  1. Let |canCreate| be false.
-  1. If |needsUserActivation| is false, then set |canCreate| to true.
-  1. Otherwise, if |window| has [=transient activation=], then:
+  1. Let |wasCreatedWithUserActivation| and |groupedWithPrevious| be null.
+  1. If |window| has [=transient activation=], then:
     1. [=Consume user activation=] given |window|.
-    1. Set |canCreate| to true.
-  1. If |canCreate| is false, then return null.
+    1. Set |wasCreatedWithUserActivation| to true.
+    1. Set |groupedWithPrevious| to false.
+  1. Otherwise, if there is no [=close watcher=] in |stack| whose [=close watcher/was created with user activation=] is false, then:
+    1. Set |wasCreatedWithUserActivation| to false.
+    1. Set |groupedWithPrevious| to false.
+
+    <p class="note">This will be the one "free" close watcher created without user activation, which is useful for cases like session inactivity timeout dialogs or notifications from the server.
+  1. Otherwise:
+    1. Set |wasCreatedWithUserActivation| to false.
+    1. Set |groupedWithPrevious| to true.
   1. Set |window|'s [=timestamp of last activation used for close watchers=] to |window|'s <a spec="HTML">last activation timestamp</a>.
-  1. Let |closeWatcher| be a new [=close watcher=] whose [=close watcher/window=] is |window|, [=close watcher/cancel action=] is |cancelAction|, and [=close watcher/close action=] is |closeAction|.
+  1. Let |closeWatcher| be a new [=close watcher=] whose [=close watcher/window=] is |window|, [=close watcher/cancel action=] is |cancelAction|, [=close watcher/close action=] is |closeAction|, [=close watcher/was created with user activation=] is |wasCreatedWithUserActivation|, and [=close watcher/is grouped with previous=] is |groupedWithPrevious|.
   1. [=stack/Push=] |closeWatcher| onto |stack|.
   1. Return |closeWatcher|.
 </div>
@@ -188,10 +198,13 @@ A <dfn export>close watcher</dfn> is a [=struct=] with the following [=struct/it
 <div algorithm>
   To <dfn>signal close watchers</dfn> given a {{Window}} |window|:
 
-  1. If |window|'s [=close watcher stack=] is empty, then return false.
-  1. Let |closeWatcher| be the last item in |window|'s [=close watcher stack=].
-  1. [=close watcher/Close=] |closeWatcher|.
-  1. Return true.
+  1. Let |processedACloseWatcher| be false.
+  1. While |window|'s [=close watcher stack=] is not empty:
+    1. Let |closeWatcher| be the last item in |window|'s [=close watcher stack=].
+    1. [=close watcher/Close=] |closeWatcher|.
+    1. Set |processedACloseWatcher| to true.
+    1. If |closeWatcher|'s [=close watcher/is grouped with previous=] is false, then [=iteration/break=].
+  1. Return |processedACloseWatcher|.
 </div>
 
 <h3 id="close-watcher-api">Close watcher API</h3>
@@ -221,19 +234,19 @@ dictionary CloseWatcherOptions {
 
     <p>If the {{CloseWatcherOptions/signal}} option is provided, <var ignore>watcher</var> can be destroyed (as if by <code><var ignore>watcher</var>.{{CloseWatcher/destroy()}}</code>) by aborting the given {{AbortSignal}}.
 
-    <p>If a {{CloseWatcher}} is already active, and the {{Window}} does not have [=transient activation|transient user activation=], then this will instead throw a "{{NotAllowedError}}" {{DOMException}}.
+    <p>If any [=close watcher=] (including both {{CloseWatcher}} objects and modal <{dialog}> elements) is already active, and the {{Window}} does not have [=transient activation|transient user activation=], then the resulting {{CloseWatcher}} will be closed together with that already-active [=close watcher=] in response to any [=close signal=].
   </dd>
 
   <dt><code><var ignore>watcher</var>.{{CloseWatcher/destroy()|destroy}}()</code></dt>
   <dd>
-    <p>Deactivates this {{CloseWatcher}} instance, so that it will no longer receive {{CloseWatcher/close}} events and so that new {{CloseWatcher}} instances can be constructed.
+    <p>Deactivates this {{CloseWatcher}} instance, so that it will no longer receive {{CloseWatcher/close}} events and so that new independent {{CloseWatcher}} instances can be constructed.
 
     <p>This is intended to be called if the relevant UI element is closed in some other way than via a [=close signal=], e.g. by pressing an explicit "Close" button.
   </dd>
 
   <dt><code><var ignore>watcher</var>.{{CloseWatcher/close()|close}}()</code></dt>
   <dd>
-    <p>Acts as if a [=close signal=] was sent targeting this {{CloseWatcher}} instance, by firing a {{CloseWatcher/close}} event and deactivating the close watcher as if {{CloseWatcher/destroy()}} was called.
+    <p>Acts as if a [=close signal=] was sent targeting this {{CloseWatcher}} instance, by firing a {{CloseWatcher/cancel}} and {{CloseWatcher/close}} event, and deactivating the close watcher as if {{CloseWatcher/destroy()}} was called.
 
     <p>This is a helper utility that can be used to consolidate closing logic into the {{CloseWatcher/close}} event handler, by having all non-[=close signal=] closing affordances call {{CloseWatcher/close()}}.
   </dd>
@@ -248,7 +261,6 @@ Each {{CloseWatcher}} has an <dfn for="CloseWatcher">internal close watcher</dfn
   1. Let |closeWatcher| be the result of [=creating a close watcher=] given [=this=]'s [=relevant global object=], with:
     * <i>[=create a close watcher/cancelAction=]</i> being to return the result of [=firing an event=] named {{CloseWatcher/cancel}} at [=this=], with the {{Event/cancelable}} attribute initialized to true.
     * <i>[=create a close watcher/closeAction=]</i> being to [=fire an event=] named {{CloseWatcher/close}} at [=this=].
-  1. If |closeWatcher| is null, then throw a "{{NotAllowedError}}" {{DOMException}}.
   1. If |options|["{{CloseWatcherOptions/signal}}"] [=map/exists=], then:
     1. If |options|["{{CloseWatcherOptions/signal}}"] is [=AbortSignal/aborted=], then [=close watcher/destroy=] |closeWatcher|.
     1. [=AbortSignal/add|Add the following abort steps=] to |options|["{{CloseWatcherOptions/signal}}"]:
@@ -287,14 +299,14 @@ Each <{dialog}> element has a <dfn for="HTMLDialogElement">close watcher</dfn>, 
     * <i>[=create a close watcher/cancelAction=]</i> being to return the result of [=firing an event=] named {{HTMLElement/cancel}} at |subject|, with the {{Event/cancelable}} attribute initialized to true.
     * <i>[=create a close watcher/closeAction=]</i> being to <a spec="HTML" lt="close">Close the dialog</a> |subject| with no return value.
 
-  <p class="note">This step can fail to create a close watcher, i.e. [=create a close watcher=] might return null and not put anything on the [=close watcher stack=]. In this case the modal dialog will not respond to [=close signals=]. The {{HTMLDialogElement/showModal()}} method proceeds without any exception or other indication of this, although the browser could [=report a warning to the console=].
+  <p class="note">The resultant [=close watcher=] might be [=close watcher/is grouped with previous|grouped=] with others on the stack, so that it responds alongside them to a single [=close signal=]. For example, opening multiple modal dialogs from a single user activation can cause this. The {{HTMLDialogElement/showModal()}} method proceeds without any exception or other indication of this, although the browser could [=report a warning to the console=].
 </div>
 
 Remove the "Canceling dialogs" section entirely. It is now handled entirely by the infrastructure in [[#close-signals]] and the creation of a [=close watcher=].
 
 Modify the <a spec="HTML" lt="close">close the dialog</a> steps to [=close watcher/destroy=] the <{dialog}>'s [=HTMLDialogElement/close watcher=] and set it to null, if it is not already null.
 
-Similarly, modify the "If at any time a <{dialog}> element is removed from a Document" steps to do the same.
+Similarly, modify the "If at any time a <{dialog}> element is remo  ved from a Document" steps to do the same.
 
 <h2 id="security-and-privacy">Security and privacy considerations</h2>
 
@@ -302,11 +314,11 @@ Similarly, modify the "If at any time a <{dialog}> element is removed from a Doc
 
 The main security consideration with this API is preventing abusive pages from hijacking the fallback behavior in the last part of the [=close signal steps=]. A concrete example is on Android, where the [=close signal=] is the software back button, and this fallback behavior is to <a spec="HTML">traverse the history by a delta</a> of &minus;1. If developers could always intercept Android back button presses via {{CloseWatcher}} instances and <{dialog}> elements, then they could effectively break the back button by never letting it pass through to the fallback behavior.
 
-Much of the complexity of this specification is designed around preventing such abuse. Without it, the API could consist of a single event. But with this constraint, we need an API surface such as the {{CloseWatcher/CloseWatcher()}} constructor which can be gated by additional checks, as well as the [=close watcher stack=] to ensure that each [=close watcher=] can only consume a single [=close signal=].
+Much of the complexity of this specification is designed around preventing such abuse. Without it, the API could consist of a single event. (Although that would make it ergonomically difficult for developers to coordinate on which component of their application should handle the [=close signal=].) But with this constraint, we need an API surface such as the {{CloseWatcher/CloseWatcher()}} constructor which can note whether [=transient activation=] was present at construction time, as well as the [=close watcher stack=] to ensure that we remove at least one [=close watcher=] per [=close signal=].
 
-Concretely, the mechanism of [=creating a close watcher=] ensures that web developers can only create {{CloseWatcher}} instances, or call {{Event/preventDefault()}} on {{CloseWatcher/cancel}} events, by [=transient activation-consuming API|consuming user activation=]. This gives similar protections to what browsers have in place today, where back button UI skips entries that were added without user activation.
+Concretely, the mechanism of [=creating a close watcher=] ensures that web developers can only create {{CloseWatcher}} instances, or call {{Event/preventDefault()}} on {{CloseWatcher/cancel}} events, by attempting to [=transient activation-consuming API|consume user activation=]. If a {{CloseWatcher}} instance is created without [=transient activation=], then after one "free" [=close watcher=], any such close watcher is [=close watcher/is grouped with previous|grouped=] together with the currently-top close watcher in the [=close watcher stack|stack=], so that both of them are closed by a single [=close signal=]. This gives similar protections to what browsers have in place today, where back button UI skips entries that were added without user activation. Similarly, if there hasn't been any [=transient activation=], the {{CloseWatcher/cancel}} event is not fired.
 
-We do allow one "free" {{CloseWatcher}} to be created, without consuming user activation, to handle cases like session inactivity timeout dialogs, or urgent notifications of server-triggered events. The end result is that this specification expands the number of Android back button presses that a maximally-abusive page could require to escape from <var>number of user activations</var> + 1 to <var>number of user activations</var> + 2. (See <a href="https://github.com/WICG/close-watcher#abuse-analysis">the explainer</a> for a full analysis.) We believe this tradeoff is worthwhile.
+We do allow one "free" ungrouped {{CloseWatcher}} to be created, even without [=transient activation=], to handle cases like session inactivity timeout dialogs, or urgent notifications of server-triggered events. The end result is that this specification expands the number of Android back button presses that a maximally-abusive page could require to escape from <var>number of user activations</var> + 1 to <var>number of user activations</var> + 2. (See <a href="https://github.com/WICG/close-watcher#abuse-analysis">the explainer</a> for a full analysis.) We believe this tradeoff is worthwhile.
 
 <h3 id="privacy">Privacy considerations</h3>
 
