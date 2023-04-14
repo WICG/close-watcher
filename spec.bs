@@ -12,7 +12,7 @@ Metadata Include: This version off
 Editor: Domenic Denicola, Google https://www.google.com/, d@domenic.me, https://domenic.me/
 Abstract: The close watcher API provides a platform-agnostic way of handling close signals.
 !Participate: <a href="https://github.com/WICG/close-watcher">GitHub WICG/close-watcher</a> (<a href="https://github.com/WICG/close-watcher/issues/new">new issue</a>, <a href="https://github.com/WICG/close-watcher/issues?state=open">open issues</a>)
-!Commits: <a href="https://github.com/WICG/close-watcher/commits/master/spec.bs">GitHub spec.bs commits</a>
+!Commits: <a href="https://github.com/WICG/close-watcher/commits/main/spec.bs">GitHub spec.bs commits</a>
 Complain About: accidental-2119 yes, missing-example-ids yes
 Indent: 2
 Default Biblio Status: current
