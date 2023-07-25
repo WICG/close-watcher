@@ -382,8 +382,8 @@ See [the specification's summary](https://wicg.github.io/close-watcher/#security
 - W3C TAG: [w3ctag/design-review#594](https://github.com/w3ctag/design-reviews/issues/594)
 - Browser engines:
   - Chromium: Positive; prototyped behind a flag
-  - Gecko: No feedback so far
-  - WebKit: No feedback so far
+  - Gecko: [Positive](https://github.com/mozilla/standards-positions/issues/604)
+  - WebKit: [No feedback so far](https://github.com/WebKit/standards-positions/issues/215)
 - Web developers: [some positive signals](https://github.com/WICG/proposals/issues/18); see also [this comment](https://github.com/w3ctag/design-reviews/issues/594#issuecomment-890257686)
 
 ## Acknowledgments
