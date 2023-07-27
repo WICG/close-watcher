@@ -24,7 +24,7 @@ No.
 
 **Do the features in your specification expose information about the underlying platform to origins?**
 
-To a small extent. In theory, by correlating signals from `CloseWatcher` with other signals (e.g. `keydown` events), one could try to determine what a platform's modal close signal is, and thus roughly into what "bucket" (desktop or not) the user falls. Such determination is fragile and coarse, and such information is already available through `navigator.userAgent` or other techniques (e.g. detecting touch events vs. mouse events).
+To a small extent. In theory, by correlating signals from `CloseWatcher` with other signals (e.g. `keydown` events), one could try to determine what a platform's close request is, and thus roughly into what "bucket" (desktop or not) the user falls. Such determination is fragile and coarse, and such information is already available through `navigator.userAgent` or other techniques (e.g. detecting touch events vs. mouse events).
 
 **Do features in this specification allow an origin access to sensors on a user’s device?**
 
@@ -44,7 +44,7 @@ No.
 
 **Do features in this specification allow an origin some measure of control over a user agent’s native UI?**
 
-Yes, in that the user agent may choose to expose its own UI (or platform UI, such as the Android back button) as a close signal. See the discussion about [abuse prevention](./README.md#abuse-analysis) in this regard.
+Yes, in that the user agent may choose to expose its own UI (or platform UI, such as the Android back button) as a close request. See the discussion about [abuse prevention](./README.md#abuse-analysis) in this regard.
 
 **What temporary identifiers do the features in this specification create or expose to the web?**
 
