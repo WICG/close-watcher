@@ -1,4 +1,8 @@
-# Close Watchers
+# Close Watchers (Archived)
+
+🚫 **This project is no longer maintained.**
+
+The `CloseWatcher` API has been merged to [the HTML Standard](https://html.spec.whatwg.org/multipage/interaction.html#close-requests-and-close-watchers).
 
 _Read on for the full story, or check out [the demo](https://close-watcher-demo.glitch.me/)!_
 
